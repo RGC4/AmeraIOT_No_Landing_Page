@@ -1,0 +1,38 @@
+# Amera Technologies
+
+Amera Technologies builds certificate-free machine identity and deterministic key governance infrastructure for OT, IT, and classified networks. Our products eliminate internal PKI complexity, stop silent certificate expiry, and deliver hardware-rooted identity at scale — with no cloud dependency.
+
+## Key Pages
+
+- Home: https://amera.io/
+- AmeraKey (machine identity & key governance): https://amera.io/products/amerakey
+- AmeraSecrets (vault-free secrets management): https://amera.io/products/amerasecrets
+
+## Industry Solutions
+
+- Manufacturing: https://amera.io/industries/manufacturing
+- Oil & Gas: https://amera.io/industries/oil-gas
+- Utilities: https://amera.io/industries/utilities
+- Financial Services: https://amera.io/industries/financial-services
+- Government & Defense: https://amera.io/industries/government-and-defense
+- Maritime: https://amera.io/industries/maritime
+- Life Sciences & Healthcare: https://amera.io/industries/life-sciences-and-healthcare
+- Retail: https://amera.io/industries/retail
+- Telecommunications: https://amera.io/industries/telecommunications
+- Transportation: https://amera.io/industries/transportation
+- Information Technology & Agentic AI: https://amera.io/industries/information-technology-agentic-ai
+- IoT: https://amera.io/industries/iot
+
+## Company
+
+- Company overview: https://amera.io/company
+- Vision & Mission: https://amera.io/company/vision-and-mission
+- Executive Team: https://amera.io/company/executive-team
+- Board of Advisors: https://amera.io/company/board-of-advisors
+- Patents: https://amera.io/company/patents
+
+## Resources & News
+
+- Resources: https://amera.io/resources
+- News: https://amera.io/news
+- Contact: https://amera.io/contact

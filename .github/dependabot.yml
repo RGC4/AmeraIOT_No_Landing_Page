@@ -1,0 +1,90 @@
+# Automated dependency-update PRs for the npm ecosystem.
+#
+# These PRs are validated automatically by the existing "Security audit"
+# GitHub Action (.github/workflows/security-audit.yml), which runs `npm audit`
+# on every pull request and fails on high/critical advisories. Dependabot
+# opens the PRs; that Action proves they actually clear the advisories.
+#
+# Why these limits:
+#   - The `rocketCritical` list in package.json marks packages the Next.js 15
+#     TypeScript app depends on for core functionality. We let Dependabot apply
+#     safe patch/minor (and security) updates, but we BLOCK major-version bumps
+#     on them so it can't drag the tree across a known-incompatible major.
+#   - `postcss` is pinned via the `overrides` block in package.json, so its
+#     major is blocked here too for the same reason.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    # Group the routine non-major updates into a single PR to cut review noise;
+    # security updates still come through on their own so they land fast.
+    groups:
+      npm-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    # Block major-version bumps on the rocketCritical packages and the
+    # `overrides`-pinned postcss. Patch/minor/security updates are still allowed.
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@dhiwise/component-tagger"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@tailwindcss/typography"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "recharts"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@typescript-eslint/eslint-plugin"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@typescript-eslint/parser"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-config-next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "autoprefixer"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "postcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prettier"
+        update-types: ["version-update:semver-major"]
+
+  # Keep the Action runners themselves current (low-risk, separate cadence).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"

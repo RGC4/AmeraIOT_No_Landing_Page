@@ -1,0 +1,90 @@
+# Raw uploads / source media — not served by the site, kept out of the repo (host large media on a CDN)
+attached_assets/
+
+# Site media (images & video) — served from the Bunny.net CDN, NOT committed.
+# These live in public/ for local dev only; production loads them from Bunny.
+# (favicon.ico and any .svg vector/icon assets stay tracked — they're tiny and code-like.)
+public/**/*.mp4
+public/**/*.mov
+public/**/*.webm
+public/**/*.m4v
+public/**/*.png
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.gif
+public/**/*.webp
+public/**/*.avif
+
+# Exception: Open Graph / social preview cards are SEO metadata assets (small,
+# code-like) and must be crawlable at a stable URL the moment the site deploys,
+# independent of the CDN media migration. Keep these committed.
+!public/assets/og-default.jpg
+!public/assets/og-amerakey.jpg
+!public/assets/og-amerasecrets.jpg
+
+# Replit agent / tooling internals — never publish to the corporate repo
+.local/
+.agents/
+
+# Working artifacts, exports & reference material — not part of the shipped site
+repomix-output.xml
+screenshots/
+exports/
+reference/
+*.docx
+*.zip
+
+# Logs (catch-all)
+*.log
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Next.js build output
+.next/
+out/
+
+# Production build
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Vercel deployment
+.vercel/
+
+# Optional: if using TypeScript
+*.tsbuildinfo      
+
+# Optional: if using testing tools
+coverage/
+jest-test-results.json
+
+# Optional: if using IDEs
+.vscode/
+.idea/
+
+# Optional: if using TurboRepo or monorepo
+turbo/
+
+# Environment variables — never commit real secrets to the repo.
+# Keep .env.example tracked so collaborators know what to configure.
+.env
+.env.local
+.env.development
+.env.development.local
+.env.production
+.env.production.local
+.env.test
+.env.test.local
+!.env.example
+
+.next/cache/

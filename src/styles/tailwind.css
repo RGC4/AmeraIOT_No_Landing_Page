@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: theme('fontFamily.heading');
+  }
+}
+
+@layer components {
+  /* Shared sitewide card system.
+     Base handles rounded corners, soft shadow and the hover-lift transition.
+     Variants adapt the surface to the section background:
+       .card-on-gray  -> sits on gray sections (white surface + soft blue border)
+       .card-on-white -> sits on white sections (light blue tint + stronger border) */
+  .card {
+    @apply rounded-2xl shadow-sm transition-all duration-200 ease-out;
+  }
+
+  .card-on-gray {
+    @apply card bg-white border border-[#114D8F];
+  }
+  .card-on-gray:hover {
+    @apply -translate-y-0.5 border-[#114D8F] shadow-md;
+  }
+
+  .card-on-white {
+    @apply card border border-[#114D8F] shadow-md;
+    background-color: rgba(77, 159, 214, 0.05);
+  }
+  .card-on-white:hover {
+    @apply -translate-y-0.5 border-[#114D8F] shadow-lg;
+    background-color: rgba(77, 159, 214, 0.08);
+  }
+
+  /* Consistent icon chip used inside cards. */
+  .card-icon {
+    @apply flex items-center justify-center rounded-xl bg-primary/10 text-primary;
+  }
+}

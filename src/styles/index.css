@@ -1,0 +1,15 @@
+@import './tailwind.css';
+
+html,
+body {
+  overflow-x: clip;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
