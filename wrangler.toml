@@ -1,6 +1,0 @@
-name = "ameraiotreplitwebsite"
-compatibility_date = "2024-04-01"
-workers_dev = true
-
-[assets]
-directory = ".next"
