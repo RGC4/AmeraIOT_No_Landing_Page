@@ -18,17 +18,17 @@ const companySchema = {
   '@type': 'AboutPage',
   name: 'Company — Amera Technologies',
   description: 'AMERA IoT Inc. — frictionless, quantum-proof security that keeps you in control of your data.',
-  url: 'https://amera.io/company',
+  url: 'https://ameraiot.com/company',
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amera.io' },
-      { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://amera.io/company' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ameraiot.com' },
+      { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://ameraiot.com/company' },
     ],
   },
   publisher: {
     '@type': 'Organization',
-    '@id': 'https://amera.io/#organization',
+    '@id': 'https://ameraiot.com/#organization',
     name: 'Amera Technologies',
   },
 };
@@ -37,13 +37,13 @@ const advisorsSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
   name: 'Amera Technologies Board of Advisors',
-  url: 'https://amera.io/company/board-of-advisors',
+  url: 'https://ameraiot.com/company/board-of-advisors',
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amera.io' },
-      { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://amera.io/company' },
-      { '@type': 'ListItem', position: 3, name: 'Board of Advisors', item: 'https://amera.io/company/board-of-advisors' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ameraiot.com' },
+      { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://ameraiot.com/company' },
+      { '@type': 'ListItem', position: 3, name: 'Board of Advisors', item: 'https://ameraiot.com/company/board-of-advisors' },
     ],
   },
   itemListElement: advisors.map((advisor, idx) => ({
@@ -55,7 +55,7 @@ const advisorsSchema = {
       jobTitle: advisor.title,
       worksFor: {
         '@type': 'Organization',
-        '@id': 'https://amera.io/#organization',
+        '@id': 'https://ameraiot.com/#organization',
         name: 'Amera Technologies',
       },
     },
@@ -66,13 +66,13 @@ const execSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
   name: 'Amera Technologies Executive Team',
-  url: 'https://amera.io/company/executive-team',
+  url: 'https://ameraiot.com/company/executive-team',
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amera.io' },
-      { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://amera.io/company' },
-      { '@type': 'ListItem', position: 3, name: 'Executive Team', item: 'https://amera.io/company/executive-team' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ameraiot.com' },
+      { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://ameraiot.com/company' },
+      { '@type': 'ListItem', position: 3, name: 'Executive Team', item: 'https://ameraiot.com/company/executive-team' },
     ],
   },
   itemListElement: executives.map((exec, idx) => ({
@@ -84,7 +84,7 @@ const execSchema = {
       jobTitle: exec.title,
       worksFor: {
         '@type': 'Organization',
-        '@id': 'https://amera.io/#organization',
+        '@id': 'https://ameraiot.com/#organization',
         name: 'Amera Technologies',
       },
     },
@@ -96,17 +96,17 @@ const resourcesSchema = {
   '@type': 'CollectionPage',
   name: 'Amera White Papers',
   description: 'White papers covering post-quantum encryption, AmeraKey technology, PKI alternatives, and IoT security.',
-  url: 'https://amera.io/resources',
+  url: 'https://ameraiot.com/resources',
   publisher: {
     '@type': 'Organization',
-    '@id': 'https://amera.io/#organization',
+    '@id': 'https://ameraiot.com/#organization',
     name: 'Amera Technologies',
   },
   hasPart: [
-    { '@type': 'DigitalDocument', name: 'AmeraKey Quantum-Proof Encryption', url: 'https://amera.io/assets/whitepaper-quantum-proof.pdf' },
-    { '@type': 'DigitalDocument', name: 'Why PKI Is the Wrong Bet for the Post-Quantum Era', url: 'https://amera.io/assets/whitepaper-pki-wrong-bet.pdf' },
-    { '@type': 'DigitalDocument', name: 'AmeraKey Introducing True IoT Security', url: 'https://amera.io/assets/whitepaper-iot-security.pdf' },
-    { '@type': 'DigitalDocument', name: 'AmeraKey Controlled Quantum Key Distribution', url: 'https://amera.io/assets/whitepaper-controlled-qkd.pdf' },
+    { '@type': 'DigitalDocument', name: 'AmeraKey Quantum-Proof Encryption', url: 'https://ameraiot.com/assets/whitepaper-quantum-proof.pdf' },
+    { '@type': 'DigitalDocument', name: 'Why PKI Is the Wrong Bet for the Post-Quantum Era', url: 'https://ameraiot.com/assets/whitepaper-pki-wrong-bet.pdf' },
+    { '@type': 'DigitalDocument', name: 'AmeraKey Introducing True IoT Security', url: 'https://ameraiot.com/assets/whitepaper-iot-security.pdf' },
+    { '@type': 'DigitalDocument', name: 'AmeraKey Controlled Quantum Key Distribution', url: 'https://ameraiot.com/assets/whitepaper-controlled-qkd.pdf' },
   ],
 };
 
@@ -116,10 +116,10 @@ const amerasecretsSchema = {
   name: 'AmeraSecrets',
   description:
     'AmeraSecrets combines deterministic key generation, automated secret lifecycle management, and enterprise policy controls into a unified platform for modern applications, cloud services, and connected infrastructure.',
-  url: 'https://amera.io/products/amerasecrets',
+  url: 'https://ameraiot.com/products/amerasecrets',
   brand: {
     '@type': 'Organization',
-    '@id': 'https://amera.io/#organization',
+    '@id': 'https://ameraiot.com/#organization',
     name: 'Amera Technologies',
   },
   category: 'Enterprise Secrets Management Software',
@@ -131,10 +131,10 @@ const amerakeySchema = {
   name: 'AmeraKey',
   description:
     'AmeraKey harvests high-entropy key material from an image, PIN, session value, and selected harvest mode so trusted endpoints can regenerate matching symmetric keys locally — without transmitting key material across the network.',
-  url: 'https://amera.io/products/amerakey',
+  url: 'https://ameraiot.com/products/amerakey',
   brand: {
     '@type': 'Organization',
-    '@id': 'https://amera.io/#organization',
+    '@id': 'https://ameraiot.com/#organization',
     name: 'Amera Technologies',
   },
   category: 'Cryptography Software',
@@ -145,10 +145,10 @@ const industriesSchema = {
   '@type': 'CollectionPage',
   name: 'Industry Use Cases — Amera Technologies',
   description: 'Explore how Amera post-quantum encryption and key governance serves manufacturing, oil & gas, utilities, financial services, government, maritime, healthcare, and more.',
-  url: 'https://amera.io/industries',
+  url: 'https://ameraiot.com/industries',
   publisher: {
     '@type': 'Organization',
-    '@id': 'https://amera.io/#organization',
+    '@id': 'https://ameraiot.com/#organization',
     name: 'Amera Technologies',
   },
 };
@@ -160,9 +160,9 @@ function industryBreadcrumb(slug: string) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://amera.io' },
-      { '@type': 'ListItem', position: 2, name: 'Industries', item: 'https://amera.io/industries' },
-      { '@type': 'ListItem', position: 3, name: meta.name, item: `https://amera.io/industries/${slug}` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ameraiot.com' },
+      { '@type': 'ListItem', position: 2, name: 'Industries', item: 'https://ameraiot.com/industries' },
+      { '@type': 'ListItem', position: 3, name: meta.name, item: `https://ameraiot.com/industries/${slug}` },
     ],
   };
 }

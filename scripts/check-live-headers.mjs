@@ -3,12 +3,12 @@
  * Verify a LIVE / deployed URL serves the exact security headers and strict
  * production Content-Security-Policy that src/middleware.ts emits. This is the
  * one check that can only be done after the site is on Vercel (and, eventually,
- * after the amera.io DNS cutover) — the middleware logic is verified locally,
+ * after the ameraiot.com DNS cutover) — the middleware logic is verified locally,
  * but whether Vercel actually runs that middleware on the real domain can only
  * be confirmed against the live URL.
  *
  * Usage:
- *   node scripts/check-live-headers.mjs https://amera.io
+ *   node scripts/check-live-headers.mjs https://ameraiot.com
  *   node scripts/check-live-headers.mjs https://<project>.vercel.app
  *   node scripts/check-live-headers.mjs http://localhost:3000   (local prod build)
  *
@@ -25,7 +25,7 @@ const TARGET = process.argv[2] || process.env.LIVE_URL;
 if (!TARGET) {
   console.error(
     'Usage: node scripts/check-live-headers.mjs <url>\n' +
-      '  e.g. node scripts/check-live-headers.mjs https://amera.io\n' +
+      '  e.g. node scripts/check-live-headers.mjs https://ameraiot.com\n' +
       '       node scripts/check-live-headers.mjs https://<project>.vercel.app',
   );
   process.exit(2);
@@ -64,7 +64,7 @@ async function main() {
 
   let res;
   // Follow redirects manually so the full hop chain is visible (an apex domain
-  // like amera.io commonly redirects), and so we validate the FINAL served
+  // like ameraiot.com commonly redirects), and so we validate the FINAL served
   // response — the page a real visitor lands on — rather than an opaque hop.
   const MAX_HOPS = 5;
   let url = TARGET;

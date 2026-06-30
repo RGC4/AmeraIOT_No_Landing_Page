@@ -36,9 +36,10 @@ repo:
 3. Add any required environment variables in **Project → Settings →
    Environment Variables** (e.g. the Bunny media API key if/when used at build
    time).
-4. Attach the custom domain **`amera.io`** under **Project → Settings →
-   Domains**, and update DNS at the registrar (GoDaddy) per Vercel's
-   instructions.
+4. Attach the custom domain **`ameraiot.com`** under **Project → Settings →
+   Domains**. The domain is registered at **GoDaddy**, but its **DNS is hosted
+   on Amazon Route 53** — so the DNS records Vercel asks for must be added in
+   **Route 53**, not at GoDaddy.
 
 DNS cutover and decommissioning the old Cloudflare setup are separate, owner-led
 steps and are out of scope for the codebase.
@@ -80,7 +81,7 @@ filename (e.g. add `-v2`). Brand-new filenames always appear immediately.
 
 Note: this is **not** Replit's "Publish" button (that deploys to Replit's own
 hosting, which this site does not use). `npm run publish` is the only thing that
-ships to the live `amera.io` site via GitHub → Vercel.
+ships to the live `ameraiot.com` site via GitHub → Vercel.
 
 ## Security headers
 

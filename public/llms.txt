@@ -4,35 +4,35 @@ Amera Technologies builds certificate-free machine identity and deterministic ke
 
 ## Key Pages
 
-- Home: https://amera.io/
-- AmeraKey (machine identity & key governance): https://amera.io/products/amerakey
-- AmeraSecrets (vault-free secrets management): https://amera.io/products/amerasecrets
+- Home: https://ameraiot.com/
+- AmeraKey (machine identity & key governance): https://ameraiot.com/products/amerakey
+- AmeraSecrets (vault-free secrets management): https://ameraiot.com/products/amerasecrets
 
 ## Industry Solutions
 
-- Manufacturing: https://amera.io/industries/manufacturing
-- Oil & Gas: https://amera.io/industries/oil-gas
-- Utilities: https://amera.io/industries/utilities
-- Financial Services: https://amera.io/industries/financial-services
-- Government & Defense: https://amera.io/industries/government-and-defense
-- Maritime: https://amera.io/industries/maritime
-- Life Sciences & Healthcare: https://amera.io/industries/life-sciences-and-healthcare
-- Retail: https://amera.io/industries/retail
-- Telecommunications: https://amera.io/industries/telecommunications
-- Transportation: https://amera.io/industries/transportation
-- Information Technology & Agentic AI: https://amera.io/industries/information-technology-agentic-ai
-- IoT: https://amera.io/industries/iot
+- Manufacturing: https://ameraiot.com/industries/manufacturing
+- Oil & Gas: https://ameraiot.com/industries/oil-gas
+- Utilities: https://ameraiot.com/industries/utilities
+- Financial Services: https://ameraiot.com/industries/financial-services
+- Government & Defense: https://ameraiot.com/industries/government-and-defense
+- Maritime: https://ameraiot.com/industries/maritime
+- Life Sciences & Healthcare: https://ameraiot.com/industries/life-sciences-and-healthcare
+- Retail: https://ameraiot.com/industries/retail
+- Telecommunications: https://ameraiot.com/industries/telecommunications
+- Transportation: https://ameraiot.com/industries/transportation
+- Information Technology & Agentic AI: https://ameraiot.com/industries/information-technology-agentic-ai
+- IoT: https://ameraiot.com/industries/iot
 
 ## Company
 
-- Company overview: https://amera.io/company
-- Vision & Mission: https://amera.io/company/vision-and-mission
-- Executive Team: https://amera.io/company/executive-team
-- Board of Advisors: https://amera.io/company/board-of-advisors
-- Patents: https://amera.io/company/patents
+- Company overview: https://ameraiot.com/company
+- Vision & Mission: https://ameraiot.com/company/vision-and-mission
+- Executive Team: https://ameraiot.com/company/executive-team
+- Board of Advisors: https://ameraiot.com/company/board-of-advisors
+- Patents: https://ameraiot.com/company/patents
 
 ## Resources & News
 
-- Resources: https://amera.io/resources
-- News: https://amera.io/news
-- Contact: https://amera.io/contact
+- Resources: https://ameraiot.com/resources
+- News: https://ameraiot.com/news
+- Contact: https://ameraiot.com/contact

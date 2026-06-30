@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const SITE_URL = 'https://amera.io';
+export const SITE_URL = 'https://ameraiot.com';
 export const SITE_NAME = 'Amera Technologies';
 export const DEFAULT_OG_IMAGE = '/assets/og-default.jpg';
 

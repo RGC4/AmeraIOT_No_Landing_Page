@@ -36,23 +36,23 @@ const siteSchema = {
   '@graph': [
     {
       '@type': 'Organization',
-      '@id': 'https://amera.io/#organization',
+      '@id': 'https://ameraiot.com/#organization',
       name: 'Amera Technologies',
       alternateName: 'AMERA IoT Inc.',
-      url: 'https://amera.io',
+      url: 'https://ameraiot.com',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://amera.io/assets/amera-logo-full.png',
+        url: 'https://ameraiot.com/assets/amera-logo-full.png',
       },
       description:
         'Amera delivers deterministic, hardware-rooted machine identity and automated key governance — eliminating PKI complexity across OT, IT, and classified networks.',
     },
     {
       '@type': 'WebSite',
-      '@id': 'https://amera.io/#website',
-      url: 'https://amera.io',
+      '@id': 'https://ameraiot.com/#website',
+      url: 'https://ameraiot.com',
       name: 'Amera Technologies',
-      publisher: { '@id': 'https://amera.io/#organization' },
+      publisher: { '@id': 'https://ameraiot.com/#organization' },
     },
   ],
 };

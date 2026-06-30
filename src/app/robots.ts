@@ -12,6 +12,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
     ],
-    sitemap: 'https://amera.io/sitemap.xml',
+    sitemap: 'https://ameraiot.com/sitemap.xml',
   };
 }

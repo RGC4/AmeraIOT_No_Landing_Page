@@ -17,7 +17,7 @@ GitHub issue for security problems.
 
 - **Preferred:** Use GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
   (the "Report a vulnerability" button under the repository's **Security** tab).
-- **Email:** security@amera.io
+- **Email:** info@ameramail.com
 
 When reporting, please include:
 

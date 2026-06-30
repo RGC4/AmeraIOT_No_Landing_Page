@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://amera.io';
+const BASE_URL = 'https://ameraiot.com';
 
 const industrySlugs = [
   'manufacturing',
