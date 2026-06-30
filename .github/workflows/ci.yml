@@ -1,0 +1,75 @@
+# Production build gate for every pull request.
+#
+# Why this exists:
+#   The Security audit job only proves a dependency bump clears advisories.
+#   A "clean" audit can still ship a broken site: a bump can introduce type
+#   errors, remove an API the code uses, or pull in an incompatible transitive
+#   version that only blows up at build time. This workflow runs the real
+#   production build (and a type-check) on every PR so a green audit can't hide
+#   a broken site.
+#
+#   IMPORTANT: next.config.mjs sets `typescript.ignoreBuildErrors: true` and
+#   `eslint.ignoreDuringBuilds: true`, so `next build` itself does NOT fail on
+#   type or lint errors. That's why the type-check below is a SEPARATE, blocking
+#   step — without it a dependency bump that breaks the types would still build
+#   green. Keep both steps.
+#
+#   This job is also the "production-build check" the Dependabot auto-merge
+#   workflow waits on: auto-merge only completes once this job goes green.
+#
+# ── One-time repo setup the owner must do in the GitHub dashboard ──
+# (cannot be done from a committed file):
+#   Settings → Branches → branch protection rule for `main` → "Require status
+#   checks to pass before merging" → select this workflow's "Production build"
+#   check (alongside the Security audit check). Until that's done this job runs
+#   but isn't enforced as a merge gate.
+
+name: CI
+
+on:
+  pull_request:
+  # Also run on pushes to main so the required check has a baseline result.
+  push:
+    branches: [main]
+
+# Read-only: this job only builds the code, it never needs write access.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the PR code
+        uses: actions/checkout@v4
+
+      # Use the same Node version as the rest of the project (.nvmrc) so the
+      # build runs against exactly what we develop and audit on.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      # `npm ci` installs strictly from package-lock.json — the same locked
+      # tree the audit ran against, no surprise resolutions.
+      - name: Install dependencies
+        run: npm ci
+
+      # Hard gate: `next build` ignores type errors (see header), so this is the
+      # real check that a dependency bump didn't break the types.
+      - name: Type-check
+        run: npm run type-check
+
+      # Hard gate: the actual production build.
+      - name: Production build
+        run: npm run build
+
+      # Advisory only: the codebase currently has pre-existing Prettier/lint
+      # drift unrelated to dependency updates, so lint is NOT a merge blocker
+      # yet — it just surfaces issues in the PR logs. Once the existing drift is
+      # cleaned up, drop `continue-on-error` to promote this to a hard gate.
+      - name: Lint (advisory)
+        run: npm run lint
+        continue-on-error: true
