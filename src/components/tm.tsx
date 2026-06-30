@@ -1,6 +1,8 @@
 import React from 'react';
 
-const REG_CLASS = 'text-[0.86em] font-normal text-[#4D9FD6]';
+// No color here on purpose: the mark inherits `currentColor` so the ®/™ always
+// matches the color of the word it sits on. Size/weight only.
+const REG_CLASS = 'text-[0.86em] font-normal';
 
 export function Reg() {
   return <sup className={REG_CLASS}>®</sup>;
