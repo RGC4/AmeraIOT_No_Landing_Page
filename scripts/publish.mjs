@@ -5,7 +5,8 @@
 //   npm run publish -- --dry-run show what WOULD happen, change nothing
 //   npm run publish -- --skip-media   only push code to GitHub
 //   npm run publish -- --skip-git     only sync images to Bunny
-//   npm run publish -- --prune        also delete files on GitHub that were removed locally
+//   npm run publish -- --prune        also delete files removed locally from BOTH
+//                                     GitHub and the Bunny CDN storage zone
 //   npm run publish -- --force        publish even if GitHub changed outside this workspace
 //
 // Nothing in this repo goes live until you run this. Editing + previewing
@@ -128,6 +129,13 @@ async function uploadBunny(localFile, remotePath) {
   if (!r.ok) die(`Upload failed for ${remotePath} (${r._error || 'HTTP ' + r.status}).`);
 }
 
+async function deleteBunny(remotePath) {
+  const url = `https://${BUNNY_STORAGE_HOST}/${BUNNY_ZONE}/${remotePath}`;
+  const r = await bunnyFetch(url, { method: 'DELETE', headers: { AccessKey: storageKey } });
+  // A 404 means it's already gone — treat that as success.
+  if (!r.ok && r.status !== 404) die(`Delete failed for ${remotePath} (${r._error || 'HTTP ' + r.status}).`);
+}
+
 async function purgeBunny(url) {
   if (!accountKey) return false;
   const r = await fetch(`https://api.bunny.net/purge?url=${encodeURIComponent(url)}&async=false`, {
@@ -145,41 +153,66 @@ async function syncMedia() {
   const remote = await listBunny(REMOTE_PREFIX, new Map());
   const localFiles = walk(ASSETS_DIR);
 
+  const localRemotePaths = new Set();
   const toUpload = []; // { localFile, remotePath, changed }
   for (const localFile of localFiles) {
     const rel = localFile.slice(ASSETS_DIR.length + 1).split('\\').join('/');
     const remotePath = `${REMOTE_PREFIX}/${rel}`;
+    localRemotePaths.add(remotePath);
     const local = sha256Upper(readFileSync(localFile));
     const remoteSum = remote.get(remotePath);
     if (remoteSum === undefined) toUpload.push({ localFile, remotePath, changed: false });
     else if (remoteSum !== local) toUpload.push({ localFile, remotePath, changed: true });
   }
 
+  // Orphans = files on Bunny under assets/ that no longer exist locally.
+  const orphans = [...remote.keys()].filter((k) => !localRemotePaths.has(k));
+
   const added = toUpload.filter((f) => !f.changed);
   const changed = toUpload.filter((f) => f.changed);
 
-  if (!toUpload.length) { log('  Up to date — no image changes.'); return; }
-  log(`  ${added.length} new, ${changed.length} changed.`);
-  for (const f of toUpload) log(`    ${f.changed ? 'changed' : 'new    '}  ${f.remotePath}`);
+  if (!toUpload.length) {
+    log('  Up to date — no image changes.');
+  } else {
+    log(`  ${added.length} new, ${changed.length} changed.`);
+    for (const f of toUpload) log(`    ${f.changed ? 'changed' : 'new    '}  ${f.remotePath}`);
 
-  if (DRY) { log('  (dry run — not uploading)'); }
-  else {
-    await chunked(toUpload, 8, (f) => uploadBunny(f.localFile, f.remotePath));
-    log('  Uploaded.');
+    if (DRY) { log('  (dry run — not uploading)'); }
+    else {
+      await chunked(toUpload, 8, (f) => uploadBunny(f.localFile, f.remotePath));
+      log('  Uploaded.');
+    }
+
+    // Same-name changes are cached at the CDN edge; try to clear them.
+    if (changed.length && !DRY) {
+      const stillCached = [];
+      for (const f of changed) {
+        const ok = await purgeBunny(`${CDN_BASE}/${f.remotePath}`);
+        if (!ok) stillCached.push(f.remotePath);
+      }
+      if (stillCached.length) {
+        log('\n  NOTE: these reused filenames may show the OLD image for up to 30 days');
+        log('  (the CDN cache could not be cleared automatically):');
+        for (const p of stillCached) log(`    ${p}`);
+        log('  To force the new version immediately, give the file a new name (e.g. add -v2).');
+      }
+    }
   }
 
-  // Same-name changes are cached at the CDN edge; try to clear them.
-  if (changed.length && !DRY) {
-    const stillCached = [];
-    for (const f of changed) {
-      const ok = await purgeBunny(`${CDN_BASE}/${f.remotePath}`);
-      if (!ok) stillCached.push(f.remotePath);
-    }
-    if (stillCached.length) {
-      log('\n  NOTE: these reused filenames may show the OLD image for up to 30 days');
-      log('  (the CDN cache could not be cleared automatically):');
-      for (const p of stillCached) log(`    ${p}`);
-      log('  To force the new version immediately, give the file a new name (e.g. add -v2).');
+  // Orphan cleanup mirrors the GitHub --prune behavior: only removes files when
+  // --prune is set, and only ever lists them under --dry-run.
+  if (orphans.length) {
+    if (PRUNE) {
+      log(`  ${orphans.length} orphan(s) on Bunny CDN (no local match):`);
+      for (const p of orphans) log(`    delete  ${p}`);
+      if (DRY) {
+        log('  (dry run — not deleting)');
+      } else {
+        await chunked(orphans, 8, (p) => deleteBunny(p));
+        log(`  ${orphans.length} removed from CDN.`);
+      }
+    } else {
+      log(`  ${orphans.length} file(s) on Bunny CDN have no local match; run with --prune to remove them.`);
     }
   }
 }
