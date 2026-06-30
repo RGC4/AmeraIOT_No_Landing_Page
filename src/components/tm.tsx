@@ -11,7 +11,8 @@ export function Reg() {
 // Excludes the corporate name "Amera IoT" / "AmeraIoT" and the "AmeraQ" sub-name.
 const BRAND_RE = /(AmeraKey|AmeraSecrets|Amera(?![A-Za-z])(?!\s?IoT))([®™]?)|([®™])/g;
 
-export function tm(text: string): React.ReactNode {
+export function tm(text: string, opts?: { markClassName?: string }): React.ReactNode {
+  const markClass = opts?.markClassName ?? REG_CLASS;
   const nodes: React.ReactNode[] = [];
   let lastIndex = 0;
   let key = 0;
@@ -29,14 +30,14 @@ export function tm(text: string): React.ReactNode {
       const symbol = match[2] === '™' ? '™' : '®';
       nodes.push(match[1]);
       nodes.push(
-        <sup key={key++} className={REG_CLASS}>
+        <sup key={key++} className={markClass}>
           {symbol}
         </sup>,
       );
     } else if (match[3]) {
       // Standalone ®/™ symbol.
       nodes.push(
-        <sup key={key++} className={REG_CLASS}>
+        <sup key={key++} className={markClass}>
           {match[3]}
         </sup>,
       );

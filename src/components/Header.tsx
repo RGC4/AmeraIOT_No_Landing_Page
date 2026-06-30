@@ -60,7 +60,7 @@ export default function Header() {
                   <div className="bg-white rounded-lg shadow-lg border border-[#A9A6A7] py-2 min-w-[190px]">
                     {productItems.map((item) => (
                       <Link key={item.href} href={item.href} className="block px-4 py-2 text-[0.8505rem] text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors">
-                        {tm(item.label)}
+                        {tm(item.label, { markClassName: 'text-[0.86em] font-normal' })}
                       </Link>
                     ))}
                   </div>
