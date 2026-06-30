@@ -43,6 +43,45 @@ repo:
 DNS cutover and decommissioning the old Cloudflare setup are separate, owner-led
 steps and are out of scope for the codebase.
 
+## Publishing changes — one command
+
+Editing and previewing locally **never** push anything live. When you're ready
+to ship, run a single command:
+
+```
+npm run publish
+```
+
+This does both halves of going live, in order:
+
+1. **Images → Bunny CDN.** Uploads any new or changed files in
+   `public/assets` to the Bunny storage zone. Unchanged files are skipped.
+2. **Code → GitHub.** Pushes your changed code to the `main` branch, which makes
+   **Vercel build and deploy automatically**.
+
+Useful variants:
+
+- `npm run publish -- --dry-run` — shows exactly what *would* be sent, changes
+  nothing. Good for a sanity check before publishing.
+- `npm run publish -- --skip-git` — only sync images to Bunny.
+- `npm run publish -- --skip-media` — only push code to GitHub.
+- `npm run publish -- --prune` — also remove files on GitHub that you deleted
+  locally (off by default for safety).
+- `npm run publish -- --force` — only needed if publishing stops with a warning
+  that "GitHub has changed since your last publish." That safety check means the
+  repo was edited somewhere other than this workspace; `--force` publishes your
+  local version anyway and overwrites those outside changes.
+
+**Reused image filenames:** the CDN caches each image URL for up to 30 days. If
+you replace a picture but keep the **same filename**, visitors may keep seeing
+the old one. The publish command tries to clear that cache automatically; if it
+can't (no purge key), it warns you and the fix is to give the new picture a new
+filename (e.g. add `-v2`). Brand-new filenames always appear immediately.
+
+Note: this is **not** Replit's "Publish" button (that deploys to Replit's own
+hosting, which this site does not use). `npm run publish` is the only thing that
+ships to the live `amera.io` site via GitHub → Vercel.
+
 ## Security headers
 
 All HTTP security headers and the strict production Content-Security-Policy live
@@ -68,3 +107,7 @@ CDN.
   and centered CTAs may stay constrained).
 - Explanations should assume a **non-technical** reader: lead with what changes
   for the user, keep jargon out.
+- **Nothing goes live automatically.** Don't push code to GitHub or upload media
+  to Bunny on every change. Batch it: changes stay local for preview, and only
+  the `npm run publish` command (see "Publishing changes") ships code + images
+  live together.

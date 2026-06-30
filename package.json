@@ -49,7 +49,8 @@
     "check:structured-data": "node scripts/check-structured-data.mjs",
     "check:structured-data:prod": "node scripts/check-structured-data.mjs --prod",
     "check:live-headers": "node scripts/check-live-headers.mjs",
-    "audit:security": "npm audit --audit-level=high"
+    "audit:security": "npm audit --audit-level=high",
+    "publish": "node scripts/publish.mjs"
   },
   "dependencies": {
     "@dhiwise/component-tagger": "^1.0.15",
