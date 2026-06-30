@@ -1,0 +1,60 @@
+# Auto-merge low-risk Dependabot PRs so they don't pile up waiting for a human.
+#
+# What this does:
+#   - Runs only on PRs opened by Dependabot.
+#   - Reads each PR's update metadata (which package, what semver jump).
+#   - For PATCH and MINOR updates (which is also where virtually all security
+#     fixes land), it turns on GitHub's native "auto-merge" for that PR.
+#   - MAJOR updates are never auto-merged — they fall through and wait for a
+#     person, matching the major-version blocks in .github/dependabot.yml.
+#
+# Important: enabling auto-merge does NOT merge immediately. GitHub only
+# completes the merge once the branch's REQUIRED STATUS CHECKS pass (the
+# Security audit job, and the production-build check). So a broken or
+# advisory-failing update can never sneak in — it just never goes green.
+#
+# ── One-time repo setup the owner must do in the GitHub dashboard ──
+# (cannot be done from a committed file; do these once after the CI checks
+#  below exist on the main branch):
+#   1. Settings → General → Pull Requests → tick "Allow auto-merge".
+#   2. Settings → Branches → add a branch protection rule for `main` and,
+#      under "Require status checks to pass before merging", select the CI
+#      checks (the Security audit job + the production-build job). Auto-merge
+#      only fires after those checks go green.
+# Do NOT enable required-checks branch protection until those check jobs
+# actually run on PRs, or every merge (not just Dependabot's) will be blocked.
+
+name: Dependabot auto-merge
+
+# Uses pull_request_target (not pull_request) on purpose: on plain
+# `pull_request`, Dependabot's GITHUB_TOKEN is read-only, so it can't enable
+# auto-merge. pull_request_target runs with the base repo's token/permissions.
+# This is SAFE here because the job never checks out or runs the PR's code — it
+# only reads Dependabot metadata and calls the merge API.
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+# Least-privilege: just enough to enable auto-merge on the PR.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot-auto-merge:
+    runs-on: ubuntu-latest
+    # Only act on Dependabot's own PRs.
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    steps:
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for patch & minor updates
+        if: ${{ steps.meta.outputs.update-type == 'version-update:semver-patch' || steps.meta.outputs.update-type == 'version-update:semver-minor' }}
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
