@@ -26,6 +26,10 @@ args = "structured-data"
 task = "workflow.run"
 args = "security-audit"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "csp-report"
+
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -60,6 +64,17 @@ args = "npm run audit:security"
 [workflows.workflow.metadata]
 isValidation = true
 
+[[workflows.workflow]]
+name = "csp-report"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run check:csp-report"
+
+[workflows.workflow.metadata]
+isValidation = true
+
 [[ports]]
 localPort = 3000
 externalPort = 3000
@@ -71,6 +86,10 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5199
+externalPort = 3002
 
 [[ports]]
 localPort = 23636

@@ -46,6 +46,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md,json}\"",
     "serve": "next start",
     "type-check": "tsc --noEmit",
+    "check:csp-report": "node scripts/check-csp-report.mjs",
     "check:structured-data": "node scripts/check-structured-data.mjs",
     "check:structured-data:prod": "node scripts/check-structured-data.mjs --prod",
     "check:live-headers": "node scripts/check-live-headers.mjs",
