@@ -81,11 +81,35 @@ async function chunked(items, size, fn) {
 }
 
 // ---- Bunny media sync ----------------------------------------------------
+// Bunny storage occasionally returns transient 401/429/5xx under load, so wrap
+// each request in a short retry with backoff before giving up.
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const RETRY_STATUS = new Set([401, 408, 429, 500, 502, 503, 504]);
+
+async function bunnyFetch(url, opts = {}, { attempts = 4 } = {}) {
+  let last;
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      const r = await fetch(url, opts);
+      if (r.ok || r.status === 404 || !RETRY_STATUS.has(r.status)) return r;
+      last = `HTTP ${r.status}`;
+    } catch (e) {
+      last = e.message;
+    }
+    if (i < attempts) {
+      const wait = 500 * 2 ** (i - 1); // 0.5s, 1s, 2s
+      log(`    (Bunny ${last}; retrying in ${wait / 1000}s — ${i}/${attempts - 1})`);
+      await sleep(wait);
+    }
+  }
+  return { ok: false, status: 0, _error: last };
+}
+
 async function listBunny(dirPath, map) {
   const url = `https://${BUNNY_STORAGE_HOST}/${BUNNY_ZONE}/${dirPath}/`;
-  const r = await fetch(url, { headers: { AccessKey: storageKey, Accept: 'application/json' } });
+  const r = await bunnyFetch(url, { headers: { AccessKey: storageKey, Accept: 'application/json' } });
   if (r.status === 404) return map; // folder doesn't exist yet
-  if (!r.ok) die(`Bunny listing failed for /${dirPath} (HTTP ${r.status}). Check BUNNY_STORAGE_PASSWORD.`);
+  if (!r.ok) die(`Bunny listing failed for /${dirPath} (${r._error || 'HTTP ' + r.status}). If this keeps happening, check BUNNY_STORAGE_PASSWORD.`);
   for (const it of await r.json()) {
     const rel = `${dirPath}/${it.ObjectName}`;
     if (it.IsDirectory) await listBunny(rel, map);
@@ -96,12 +120,12 @@ async function listBunny(dirPath, map) {
 
 async function uploadBunny(localFile, remotePath) {
   const url = `https://${BUNNY_STORAGE_HOST}/${BUNNY_ZONE}/${remotePath}`;
-  const r = await fetch(url, {
+  const r = await bunnyFetch(url, {
     method: 'PUT',
     headers: { AccessKey: storageKey, 'Content-Type': contentType(localFile) },
     body: readFileSync(localFile),
   });
-  if (!r.ok) die(`Upload failed for ${remotePath} (HTTP ${r.status}).`);
+  if (!r.ok) die(`Upload failed for ${remotePath} (${r._error || 'HTTP ' + r.status}).`);
 }
 
 async function purgeBunny(url) {
