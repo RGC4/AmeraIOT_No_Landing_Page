@@ -8,7 +8,6 @@ import { tm } from '../components/tm';
 
 const productItems = [
   { href: '/products/amerakey', label: 'AmeraKey' },
-  { href: '/products/amerasecrets', label: 'AmeraSecrets' },
 ];
 
 const companyItems = [
