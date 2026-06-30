@@ -1,0 +1,56 @@
+# Dependency security gate for every pull request.
+#
+# Why this exists:
+#   This is the "Security audit" check that .github/dependabot.yml and the
+#   Dependabot auto-merge workflow both rely on. It runs `npm audit` on every
+#   PR and FAILS on high/critical advisories, so a dependency bump can only
+#   merge once it actually clears the advisories it claims to fix.
+#
+#   It is intentionally separate from the CI "Production build" job: this job
+#   proves the dependency tree has no high/critical vulnerabilities, while CI
+#   proves the code still type-checks and builds. Dependabot auto-merge waits
+#   on BOTH before completing a merge.
+#
+# ── One-time repo setup the owner must do in the GitHub dashboard ──
+# (cannot be done from a committed file):
+#   Settings → Branches → branch protection rule for `main` → "Require status
+#   checks to pass before merging" → select this workflow's "Security audit"
+#   check (alongside the "Production build" check). Until that's done this job
+#   runs but isn't enforced as a merge gate.
+
+name: Security audit
+
+on:
+  pull_request:
+  # Also run on pushes to main so the required check has a baseline result.
+  push:
+    branches: [main]
+
+# Read-only: this job only audits the dependency tree, it never needs write access.
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the PR code
+        uses: actions/checkout@v4
+
+      # Use the same Node version as the rest of the project (.nvmrc).
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      # `npm ci` installs strictly from package-lock.json — audit exactly the
+      # locked tree, no surprise resolutions.
+      - name: Install dependencies
+        run: npm ci
+
+      # Hard gate: fail the PR on any high or critical advisory. Mirrors the
+      # `audit:security` npm script (`npm audit --audit-level=high`).
+      - name: Audit dependencies (high/critical)
+        run: npm run audit:security

@@ -6,7 +6,7 @@
 # opens the PRs; that Action proves they actually clear the advisories.
 #
 # Why these limits:
-#   - The `rocketCritical` list in package.json marks packages the Next.js 15
+#   - The packages listed under `ignore` below are what the Next.js 15
 #     TypeScript app depends on for core functionality. We let Dependabot apply
 #     safe patch/minor (and security) updates, but we BLOCK major-version bumps
 #     on them so it can't drag the tree across a known-incompatible major.
