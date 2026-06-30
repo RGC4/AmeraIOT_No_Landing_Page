@@ -88,7 +88,7 @@ export default function VisionAndMissionPage() {
 
         {/* Contact CTA */}
         <section className="mt-14">
-          <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-8 py-12 text-center">
+          <div className="rounded-2xl bg-[#114D8F] px-8 py-12 text-center">
             <p className="text-white/70 text-sm font-semibold tracking-[2px] uppercase">Let&rsquo;s get in touch</p>
             <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-white">
               Contact us to learn what AmeraKey<Reg /> can do for you.
