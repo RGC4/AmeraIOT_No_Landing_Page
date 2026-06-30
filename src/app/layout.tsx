@@ -42,7 +42,7 @@ const siteSchema = {
       url: 'https://amera.io',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://amera.io/assets/amera-logo-v4.png',
+        url: 'https://amera.io/assets/amera-logo-full.png',
       },
       description:
         'Amera delivers deterministic, hardware-rooted machine identity and automated key governance — eliminating PKI complexity across OT, IT, and classified networks.',
