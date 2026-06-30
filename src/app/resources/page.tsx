@@ -30,7 +30,7 @@ export default function ResourcesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             { i: 1, src: '/assets/whitepaper-quantum-proof-v4.png', w: 557, h: 680, alt: 'AmeraKey Quantum-Proof Encryption', href: '/assets/whitepaper-quantum-proof.pdf' },
-            { i: 2, src: '/assets/whitepaper-pki-wrong-bet-v5.png', w: 557, h: 680, alt: 'Why PKI Is the Wrong Bet for the Post-Quantum Era', href: '/assets/whitepaper-pki-wrong-bet.pdf' },
+            { i: 2, src: '/assets/whitepaper-pki-wrong-bet-v6.png', w: 557, h: 680, alt: 'Why PKI Is the Wrong Bet for the Post-Quantum Era', href: '/assets/whitepaper-pki-wrong-bet.pdf' },
             { i: 3, src: '/assets/whitepaper-iot-security-v4.png', w: 557, h: 680, alt: 'AmeraKey Introducing True IoT Security', href: '/assets/whitepaper-iot-security.pdf' },
             { i: 4, src: '/assets/whitepaper-controlled-qkd-v7.png', w: 557, h: 680, alt: 'AmeraKey Controlled Quantum Key Distribution — Breaking the Shackles of PKI', href: '/assets/whitepaper-controlled-qkd.pdf' },
           ].map(({ i, src, w, h, alt, href }) => {
