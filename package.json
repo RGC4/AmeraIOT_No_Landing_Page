@@ -49,6 +49,7 @@
     "check:csp-report": "tsx scripts/check-csp-report.mts",
     "check:structured-data": "node scripts/check-structured-data.mjs",
     "check:structured-data:prod": "node scripts/check-structured-data.mjs --prod",
+    "check:structured-data:validators": "node scripts/check-structured-data-validators.mjs",
     "check:live-headers": "node scripts/check-live-headers.mjs",
     "audit:security": "npm audit --audit-level=high",
     "publish": "node scripts/publish.mjs"

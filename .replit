@@ -30,6 +30,10 @@ args = "security-audit"
 task = "workflow.run"
 args = "csp-report"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "structured-data-validators"
+
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -71,6 +75,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run check:csp-report"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "structured-data-validators"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run check:structured-data:validators"
 
 [workflows.workflow.metadata]
 isValidation = true

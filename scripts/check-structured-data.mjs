@@ -37,7 +37,7 @@
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -565,7 +565,26 @@ async function main() {
   console.log('\nStructured-data check passed: every route emits nonced, well-formed JSON-LD.');
 }
 
-main().catch((err) => {
-  console.error('Structured-data check errored:', err);
-  process.exit(1);
-});
+// Crawl the live site only when invoked directly. Importing this module (e.g.
+// from the validator unit tests in check-structured-data-validators.mjs) must
+// NOT start a server — it should only pull in the shape-validation helpers.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error('Structured-data check errored:', err);
+    process.exit(1);
+  });
+}
+
+// Exported so the shape-validation helpers can be unit-tested in isolation,
+// guarding against one of them being silently weakened (the failure mode the
+// structured-data guard exists to prevent).
+export {
+  isObj,
+  isNonEmptyStr,
+  isValidUrl,
+  requireStrings,
+  checkBreadcrumb,
+  checkItemList,
+  checkSiteWide,
+  checkRouteSchema,
+};
