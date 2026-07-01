@@ -39,7 +39,10 @@ reference/
 
 # Node modules
 node_modules/
-package-lock.json
+
+# Nested lockfiles (e.g. artifact sub-projects) — only the root
+# package-lock.json is tracked so CI `npm ci` has a lockfile to install from.
+artifacts/**/package-lock.json
 
 # Next.js build output
 .next/
