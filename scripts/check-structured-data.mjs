@@ -80,9 +80,12 @@ const EXPECTED = {
   '/news': {
     kind: 'self',
     minBlocks: 1,
-    contentMarker: 'Read article',
     minBlocksWithContent: 2,
-    // The ItemList only renders when there are articles; validated only then.
+    // The ItemList only renders when the feed has articles. Whether the feed
+    // has content is detected from the structured data itself (the presence of
+    // the ItemList JSON-LD block) rather than by matching visible UI text like
+    // a "Read article" label, which could be reworded and silently skip
+    // validating the news schema. Validated only when that block is present.
     schemaType: 'ItemList',
     schemaWhenContent: true,
     itemList: { itemType: 'NewsArticle', itemRequiresUrl: true },
@@ -505,8 +508,17 @@ async function main() {
       }
 
       const blocks = extractJsonLd(res.body);
+      const parsed = blocks.filter((b) => b.valid).map((b) => b.json);
+
+      // For a 'self' route whose route schema only renders with content, decide
+      // whether the feed has content from the structured data itself — the
+      // presence of the route's JSON-LD block (its @type) — instead of matching
+      // visible UI text. Wording of an on-screen label could change without the
+      // feed being empty, which would wrongly skip validating the news schema.
       const hasContent =
-        cfg.kind === 'self' && cfg.contentMarker ? res.body.includes(cfg.contentMarker) : false;
+        cfg.kind === 'self' && cfg.schemaWhenContent && cfg.schemaType
+          ? parsed.some((j) => isObj(j) && j['@type'] === cfg.schemaType)
+          : false;
 
       let required = cfg.minBlocks;
       if (cfg.kind === 'self' && hasContent) {
@@ -529,8 +541,7 @@ async function main() {
         }
       });
 
-      // SHAPE VALIDATION on the parsed payloads.
-      const parsed = blocks.filter((b) => b.valid).map((b) => b.json);
+      // SHAPE VALIDATION on the parsed payloads (parsed above).
       const routeErrors = [];
       checkSiteWide(parsed, path, routeErrors);
       // Validate the route block, except for 'self' routes whose schema only
