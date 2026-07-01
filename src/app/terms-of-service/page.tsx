@@ -75,7 +75,8 @@ export default function TermsOfServicePage() {
             Terms of Service
           </h1>
           <p className="mt-4 text-white/85 text-base sm:text-lg leading-relaxed">
-            The terms governing your use of the Amera<Reg /> website and services.
+            The terms governing your use of the Amera
+            <Reg /> website and services.
           </p>
         </div>
       </section>

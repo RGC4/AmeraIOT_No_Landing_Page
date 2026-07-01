@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PERMISSIONS_POLICY =
-  'camera=(), microphone=(), geolocation=(), browsing-topics=()';
+const PERMISSIONS_POLICY = 'camera=(), microphone=(), geolocation=(), browsing-topics=()';
 
 // CSP violation reports are posted here (same-origin Next.js route handler).
 // Wired into the production CSP via both the modern Reporting API
@@ -105,27 +104,21 @@ export function middleware(request: NextRequest) {
   // `Reporting-Endpoints` is the modern Reporting API header; `Report-To` is the
   // legacy JSON form still required by some browsers.
   if (process.env.NODE_ENV === 'production') {
-    response.headers.set(
-      'Reporting-Endpoints',
-      `${CSP_REPORT_GROUP}="${CSP_REPORT_PATH}"`,
-    );
+    response.headers.set('Reporting-Endpoints', `${CSP_REPORT_GROUP}="${CSP_REPORT_PATH}"`);
     response.headers.set(
       'Report-To',
       JSON.stringify({
         group: CSP_REPORT_GROUP,
         max_age: 10886400,
         endpoints: [{ url: CSP_REPORT_PATH }],
-      }),
+      })
     );
   }
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', PERMISSIONS_POLICY);
-  response.headers.set(
-    'Strict-Transport-Security',
-    'max-age=63072000; includeSubDomains; preload',
-  );
+  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   response.headers.set('X-XSS-Protection', '1; mode=block');
 
   return response;

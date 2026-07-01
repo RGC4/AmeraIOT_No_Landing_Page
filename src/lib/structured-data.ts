@@ -17,7 +17,8 @@ const companySchema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
   name: 'Company — Amera Technologies',
-  description: 'AMERA IoT Inc. — frictionless, quantum-proof security that keeps you in control of your data.',
+  description:
+    'AMERA IoT Inc. — frictionless, quantum-proof security that keeps you in control of your data.',
   url: 'https://ameraiot.com/company',
   breadcrumb: {
     '@type': 'BreadcrumbList',
@@ -43,7 +44,12 @@ const advisorsSchema = {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ameraiot.com' },
       { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://ameraiot.com/company' },
-      { '@type': 'ListItem', position: 3, name: 'Board of Advisors', item: 'https://ameraiot.com/company/board-of-advisors' },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Board of Advisors',
+        item: 'https://ameraiot.com/company/board-of-advisors',
+      },
     ],
   },
   itemListElement: advisors.map((advisor, idx) => ({
@@ -72,7 +78,12 @@ const execSchema = {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ameraiot.com' },
       { '@type': 'ListItem', position: 2, name: 'Company', item: 'https://ameraiot.com/company' },
-      { '@type': 'ListItem', position: 3, name: 'Executive Team', item: 'https://ameraiot.com/company/executive-team' },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Executive Team',
+        item: 'https://ameraiot.com/company/executive-team',
+      },
     ],
   },
   itemListElement: executives.map((exec, idx) => ({
@@ -95,7 +106,8 @@ const resourcesSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: 'Amera White Papers',
-  description: 'White papers covering post-quantum encryption, AmeraKey technology, PKI alternatives, and IoT security.',
+  description:
+    'White papers covering post-quantum encryption, AmeraKey technology, PKI alternatives, and IoT security.',
   url: 'https://ameraiot.com/resources',
   publisher: {
     '@type': 'Organization',
@@ -103,10 +115,26 @@ const resourcesSchema = {
     name: 'Amera Technologies',
   },
   hasPart: [
-    { '@type': 'DigitalDocument', name: 'AmeraKey Quantum-Proof Encryption', url: 'https://ameraiot.com/assets/whitepaper-quantum-proof.pdf' },
-    { '@type': 'DigitalDocument', name: 'Why PKI Is the Wrong Bet for the Post-Quantum Era', url: 'https://ameraiot.com/assets/whitepaper-pki-wrong-bet.pdf' },
-    { '@type': 'DigitalDocument', name: 'AmeraKey Introducing True IoT Security', url: 'https://ameraiot.com/assets/whitepaper-iot-security.pdf' },
-    { '@type': 'DigitalDocument', name: 'AmeraKey Controlled Quantum Key Distribution', url: 'https://ameraiot.com/assets/whitepaper-controlled-qkd.pdf' },
+    {
+      '@type': 'DigitalDocument',
+      name: 'AmeraKey Quantum-Proof Encryption',
+      url: 'https://ameraiot.com/assets/whitepaper-quantum-proof.pdf',
+    },
+    {
+      '@type': 'DigitalDocument',
+      name: 'Why PKI Is the Wrong Bet for the Post-Quantum Era',
+      url: 'https://ameraiot.com/assets/whitepaper-pki-wrong-bet.pdf',
+    },
+    {
+      '@type': 'DigitalDocument',
+      name: 'AmeraKey Introducing True IoT Security',
+      url: 'https://ameraiot.com/assets/whitepaper-iot-security.pdf',
+    },
+    {
+      '@type': 'DigitalDocument',
+      name: 'AmeraKey Controlled Quantum Key Distribution',
+      url: 'https://ameraiot.com/assets/whitepaper-controlled-qkd.pdf',
+    },
   ],
 };
 
@@ -144,7 +172,8 @@ const industriesSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: 'Industry Use Cases — Amera Technologies',
-  description: 'Explore how Amera post-quantum encryption and key governance serves manufacturing, oil & gas, utilities, financial services, government, maritime, healthcare, and more.',
+  description:
+    'Explore how Amera post-quantum encryption and key governance serves manufacturing, oil & gas, utilities, financial services, government, maritime, healthcare, and more.',
   url: 'https://ameraiot.com/industries',
   publisher: {
     '@type': 'Organization',
@@ -161,8 +190,18 @@ function industryBreadcrumb(slug: string) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ameraiot.com' },
-      { '@type': 'ListItem', position: 2, name: 'Industries', item: 'https://ameraiot.com/industries' },
-      { '@type': 'ListItem', position: 3, name: meta.name, item: `https://ameraiot.com/industries/${slug}` },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Industries',
+        item: 'https://ameraiot.com/industries',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: meta.name,
+        item: `https://ameraiot.com/industries/${slug}`,
+      },
     ],
   };
 }
@@ -183,9 +222,7 @@ const STATIC_SCHEMAS: Record<string, unknown> = {
  * (article-derived) schema inside its server page.
  */
 export function getRouteStructuredData(pathname: string): unknown {
-  const path = pathname !== '/' && pathname.endsWith('/')
-    ? pathname.slice(0, -1)
-    : pathname;
+  const path = pathname !== '/' && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 
   if (path in STATIC_SCHEMAS) return STATIC_SCHEMAS[path];
 

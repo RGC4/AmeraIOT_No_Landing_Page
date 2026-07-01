@@ -23,7 +23,9 @@ function AdvisorCard({ advisor }: { advisor: Advisor }) {
   const firstParagraph = advisor.bio[0];
   const hasMore = advisor.bio.length > 1 || firstParagraph.length > 170;
   const preview =
-    firstParagraph.length > 170 ? `${firstParagraph.slice(0, 170).trimEnd()}\u2026` : firstParagraph;
+    firstParagraph.length > 170
+      ? `${firstParagraph.slice(0, 170).trimEnd()}\u2026`
+      : firstParagraph;
 
   return (
     <div className="card-on-gray overflow-hidden flex flex-col">
@@ -62,14 +64,16 @@ function AdvisorCard({ advisor }: { advisor: Advisor }) {
             type="button"
             onClick={() => setOpen((prev) => !prev)}
             aria-expanded={open}
-            className="mt-4 self-start text-primary text-sm font-semibold hover:underline inline-flex items-center gap-1">
+            className="mt-4 self-start text-primary text-sm font-semibold hover:underline inline-flex items-center gap-1"
+          >
             {open ? 'Show Less' : 'Learn More'}
             <svg
               className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2}>
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -87,9 +91,13 @@ export default function BoardOfAdvisorsPage() {
       {/* Page Content */}
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
         <div className="mb-10">
-          <h1 className="text-[1.9rem] sm:text-[2.55rem] leading-tight font-bold text-gray-900 tracking-tight">Board of Advisors</h1>
+          <h1 className="text-[1.9rem] sm:text-[2.55rem] leading-tight font-bold text-gray-900 tracking-tight">
+            Board of Advisors
+          </h1>
           <p className="mt-2 text-gray-500 text-lg">
-            Industry, defense, and technology leaders guiding Amera<Reg />&rsquo;s mission and quantum-safe strategy.
+            Industry, defense, and technology leaders guiding Amera
+            <Reg />
+            &rsquo;s mission and quantum-safe strategy.
           </p>
         </div>
 

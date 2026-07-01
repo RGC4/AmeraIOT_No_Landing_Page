@@ -34,10 +34,6 @@ export async function generateMetadata({
   });
 }
 
-export default function IndustrySlugLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function IndustrySlugLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

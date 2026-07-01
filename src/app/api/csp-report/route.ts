@@ -164,9 +164,7 @@ async function forwardViolations(summaries: string[]): Promise<void> {
       signal: controller.signal,
     });
     if (!res.ok) {
-      console.warn(
-        `[csp-violation] forward failed: webhook responded ${res.status}`,
-      );
+      console.warn(`[csp-violation] forward failed: webhook responded ${res.status}`);
     }
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
@@ -181,7 +179,7 @@ async function forwardViolations(summaries: string[]): Promise<void> {
 // more than the cap, even if the client lies about or omits Content-Length.
 async function readBodyCapped(
   request: NextRequest,
-  maxBytes: number,
+  maxBytes: number
 ): Promise<{ text: string; tooLarge: boolean }> {
   const body = request.body;
   if (!body) return { text: '', tooLarge: false };
@@ -240,10 +238,7 @@ function normalize(payload: unknown): CspViolationFields[] {
   if (Array.isArray(payload)) {
     return payload
       .filter(
-        (r) =>
-          r &&
-          typeof r === 'object' &&
-          (r as Record<string, unknown>).type === 'csp-violation',
+        (r) => r && typeof r === 'object' && (r as Record<string, unknown>).type === 'csp-violation'
       )
       .map((r) => (r as Record<string, unknown>).body as CspViolationFields)
       .filter(Boolean);
@@ -286,10 +281,7 @@ export async function POST(request: NextRequest) {
   for (const v of violations) {
     const documentUri = v['document-uri'] ?? v.documentURL ?? 'unknown';
     const directive =
-      v['effective-directive'] ??
-      v.effectiveDirective ??
-      v['violated-directive'] ??
-      'unknown';
+      v['effective-directive'] ?? v.effectiveDirective ?? v['violated-directive'] ?? 'unknown';
     const blockedUri = v['blocked-uri'] ?? v.blockedURL ?? 'unknown';
     const disposition = v.disposition ?? 'enforce';
 

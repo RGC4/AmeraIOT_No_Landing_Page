@@ -23,7 +23,7 @@ interface CacheShape {
 const GOOGLE_QUERY =
   '("post-quantum cryptography" OR "quantum-resistant encryption" OR "quantum safe" OR "IoT security" OR "symmetric key management" OR "encryption key distribution" OR "passwordless authentication" OR "secure document signing") -crypto -bitcoin -blockchain';
 const GOOGLE_NEWS_URL = `https://news.google.com/rss/search?q=${encodeURIComponent(
-  GOOGLE_QUERY,
+  GOOGLE_QUERY
 )}&hl=en-US&gl=US&ceid=US:en`;
 
 const FEEDS: FeedConfig[] = [
@@ -31,7 +31,11 @@ const FEEDS: FeedConfig[] = [
   { url: 'https://www.bleepingcomputer.com/feed/', source: 'BleepingComputer' },
   { url: 'https://feeds.feedburner.com/TheHackersNews', source: 'The Hacker News' },
   { url: 'https://www.cisa.gov/cybersecurity-advisories/all.xml', source: 'CISA' },
-  { url: 'https://www.schneier.com/feed/atom/', source: 'Schneier on Security', alwaysInclude: true },
+  {
+    url: 'https://www.schneier.com/feed/atom/',
+    source: 'Schneier on Security',
+    alwaysInclude: true,
+  },
 ];
 
 const TTL = 30 * 60 * 1000;
@@ -39,14 +43,34 @@ const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 let cache: CacheShape | null = null;
 
 const TOPICS: { label: string; re: RegExp; weight: number }[] = [
-  { label: 'Post-Quantum', re: /post[- ]?quantum|quantum[- ]?(resistant|safe)|\bpqc\b|\bqkd\b/i, weight: 6 },
+  {
+    label: 'Post-Quantum',
+    re: /post[- ]?quantum|quantum[- ]?(resistant|safe)|\bpqc\b|\bqkd\b/i,
+    weight: 6,
+  },
   { label: 'Quantum Security', re: /quantum/i, weight: 3 },
-  { label: 'IoT Security', re: /\biot\b|internet of things|embedded device|\bot security\b|smart device/i, weight: 5 },
-  { label: 'Key Management', re: /key management|symmetric key|encryption key|key distribution|key exchange|\bkms\b|\bhsm\b/i, weight: 5 },
+  {
+    label: 'IoT Security',
+    re: /\biot\b|internet of things|embedded device|\bot security\b|smart device/i,
+    weight: 5,
+  },
+  {
+    label: 'Key Management',
+    re: /key management|symmetric key|encryption key|key distribution|key exchange|\bkms\b|\bhsm\b/i,
+    weight: 5,
+  },
   { label: 'Passwordless', re: /passwordless|passkey|fido2?|webauthn/i, weight: 5 },
-  { label: 'Document Signing', re: /document signing|digital signature|e-?signature|signing certificate|code signing/i, weight: 5 },
+  {
+    label: 'Document Signing',
+    re: /document signing|digital signature|e-?signature|signing certificate|code signing/i,
+    weight: 5,
+  },
   { label: 'Encryption', re: /encrypt|cryptograph|cipher|\btls\b|\bpki\b/i, weight: 2 },
-  { label: 'Cybersecurity', re: /ransomware|malware|breach|vulnerabilit|exploit|cve-|zero[- ]day|phishing|cyber|advisory/i, weight: 1 },
+  {
+    label: 'Cybersecurity',
+    re: /ransomware|malware|breach|vulnerabilit|exploit|cve-|zero[- ]day|phishing|cyber|advisory/i,
+    weight: 1,
+  },
 ];
 
 const EXCLUDE_RE =
@@ -115,7 +139,12 @@ function extractLink(block: string): string | null {
 
 function truncate(text: string, max = 180): string {
   if (text.length <= max) return text;
-  return text.slice(0, max).replace(/\s+\S*$/, '').trim() + '…';
+  return (
+    text
+      .slice(0, max)
+      .replace(/\s+\S*$/, '')
+      .trim() + '…'
+  );
 }
 
 function isSponsored(title: string, categories: string[], block: string): boolean {
@@ -126,7 +155,10 @@ function isSponsored(title: string, categories: string[], block: string): boolea
   return false;
 }
 
-function scoreAndCategorize(text: string, fallbackCategory: string): { score: number; category: string } {
+function scoreAndCategorize(
+  text: string,
+  fallbackCategory: string
+): { score: number; category: string } {
   let score = 0;
   let category = '';
   let bestWeight = 0;
@@ -182,24 +214,42 @@ async function fetchFeed(feed: FeedConfig): Promise<Article[]> {
       if (SOURCE_DENYLIST.test(source)) continue;
 
       const rawSummary =
-        extractTag(block, 'description') || extractTag(block, 'summary') || extractTag(block, 'content');
+        extractTag(block, 'description') ||
+        extractTag(block, 'summary') ||
+        extractTag(block, 'content');
       let summary = rawSummary ? truncate(decodeEntities(rawSummary)) : '';
-      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const norm = (s: string) =>
+        s
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim();
       if (summary && norm(summary).startsWith(norm(title))) summary = '';
 
       const rawPub =
-        extractTag(block, 'pubDate') || extractTag(block, 'published') || extractTag(block, 'updated');
+        extractTag(block, 'pubDate') ||
+        extractTag(block, 'published') ||
+        extractTag(block, 'updated');
       const parsed = rawPub ? new Date(decodeEntities(rawPub)) : null;
       const pubDate = parsed && !isNaN(parsed.getTime()) ? parsed.toISOString() : '';
 
-      if (!parsed || isNaN(parsed.getTime()) || parsed.getTime() < Date.now() - MAX_AGE_MS) continue;
+      if (!parsed || isNaN(parsed.getTime()) || parsed.getTime() < Date.now() - MAX_AGE_MS)
+        continue;
 
       const haystack = `${title} ${summary} ${categories.join(' ')}`;
       if (EXCLUDE_RE.test(haystack) || FINANCE_RE.test(haystack)) continue;
 
       const { score, category } = scoreAndCategorize(haystack, categories[0] || 'Cybersecurity');
 
-      articles.push({ title, link, source, summary, pubDate, category, score, pinned: feed.alwaysInclude });
+      articles.push({
+        title,
+        link,
+        source,
+        summary,
+        pubDate,
+        category,
+        score,
+        pinned: feed.alwaysInclude,
+      });
     }
 
     return articles;
@@ -216,7 +266,10 @@ function buildFeed(articles: Article[]): Article[] {
   const deduped: Article[] = [];
   for (const a of articles) {
     const linkKey = a.link.toLowerCase();
-    const titleKey = a.title.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const titleKey = a.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
     if (seenLink.has(linkKey) || (titleKey && seenTitle.has(titleKey))) continue;
     seenLink.add(linkKey);
     if (titleKey) seenTitle.add(titleKey);
@@ -237,7 +290,11 @@ function buildFeed(articles: Article[]): Article[] {
   return [...pinned, ...ranked.slice(0, Math.max(0, 12 - pinned.length))];
 }
 
-export async function getNewsFeed(): Promise<{ articles: Article[]; cachedAt: string; stale?: boolean }> {
+export async function getNewsFeed(): Promise<{
+  articles: Article[];
+  cachedAt: string;
+  stale?: boolean;
+}> {
   if (cache && Date.now() - cache.ts < TTL) {
     return { articles: cache.data, cachedAt: new Date(cache.ts).toISOString() };
   }

@@ -76,7 +76,8 @@ export default function VisionAndMissionPage() {
                 key={idx}
                 className={`card-on-gray p-6 flex gap-4${
                   idx === problemSolutions.length - 1 ? ' lg:col-start-2' : ''
-                }`}>
+                }`}
+              >
                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
                   {idx + 1}
                 </div>
@@ -89,13 +90,17 @@ export default function VisionAndMissionPage() {
         {/* Contact CTA */}
         <section className="mt-14">
           <div className="rounded-2xl bg-brand px-8 py-12 text-center">
-            <p className="text-white/70 text-sm font-semibold tracking-[2px] uppercase">Let&rsquo;s get in touch</p>
+            <p className="text-white/70 text-sm font-semibold tracking-[2px] uppercase">
+              Let&rsquo;s get in touch
+            </p>
             <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-white">
-              Contact us to learn what AmeraKey<Reg /> can do for you.
+              Contact us to learn what AmeraKey
+              <Reg /> can do for you.
             </h2>
             <Link
               href="/contact"
-              className="mt-7 inline-flex items-center gap-2 bg-white text-primary hover:bg-gray-100 text-sm font-semibold px-7 py-3 rounded-lg transition-colors duration-200 shadow-lg">
+              className="mt-7 inline-flex items-center gap-2 bg-white text-primary hover:bg-gray-100 text-sm font-semibold px-7 py-3 rounded-lg transition-colors duration-200 shadow-lg"
+            >
               Get in Touch
             </Link>
           </div>

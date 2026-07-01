@@ -25,13 +25,7 @@ function serialize(data: unknown): string {
  * — the nonce was applied at parse time — so we tell React not to warn on this
  * element's attributes rather than dropping the nonce.
  */
-export default function JsonLd({
-  data,
-  nonce,
-}: {
-  data: unknown;
-  nonce?: string;
-}) {
+export default function JsonLd({ data, nonce }: { data: unknown; nonce?: string }) {
   return (
     <script
       type="application/ld+json"

@@ -3,7 +3,12 @@ import VideoModal from './VideoModal';
 
 const iconCircle = (
   <span className="flex h-[29px] w-[29px] sm:h-[36px] sm:w-[36px] flex-shrink-0 items-center justify-center rounded-full bg-[#114D8F] text-white shadow-sm transition-colors group-hover:bg-[#0e4179] group-focus-visible:ring-2 group-focus-visible:ring-[#114D8F]/50 group-focus-visible:ring-offset-2">
-    <svg className="h-[16px] w-[16px] sm:h-[19px] sm:w-[19px] translate-x-[1px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg
+      className="h-[16px] w-[16px] sm:h-[19px] sm:w-[19px] translate-x-[1px]"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <path d="M8 5v14l11-7z" />
     </svg>
   </span>
@@ -29,7 +34,15 @@ interface SectionCueProps {
   className?: string;
 }
 
-export default function SectionCue({ label, bunnyLibraryId, bunnyVideoId, src, href, title, className = '' }: SectionCueProps) {
+export default function SectionCue({
+  label,
+  bunnyLibraryId,
+  bunnyVideoId,
+  src,
+  href,
+  title,
+  className = '',
+}: SectionCueProps) {
   if (href) {
     return (
       <a

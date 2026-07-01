@@ -32,7 +32,10 @@ const sections: Section[] = [
             term: 'Payment Information',
             desc: 'Credit card details, billing address, and transaction history. If you use a third-party processor like Stripe or PayPal, they handle this information directly.',
           },
-          { term: 'User Content', desc: 'Comments, reviews, or messages sent through contact forms.' },
+          {
+            term: 'User Content',
+            desc: 'Comments, reviews, or messages sent through contact forms.',
+          },
         ],
       },
       {
@@ -130,7 +133,10 @@ const sections: Section[] = [
     intro: 'If you have any questions or concerns about this Privacy Policy, please contact us:',
     bullets: [
       { term: 'By Email', desc: '[Your Contact Email Address]' },
-      { term: 'By Mail', desc: 'Amera IoT, Inc., Belt Line Road, Suite 212-288, Addison, TX 75001' },
+      {
+        term: 'By Mail',
+        desc: 'Amera IoT, Inc., Belt Line Road, Suite 212-288, Addison, TX 75001',
+      },
       { term: 'By Phone', desc: '[Your Business Phone Number]' },
     ],
   },
@@ -195,9 +201,9 @@ export default function PrivacyPolicyPage() {
           <p className="mt-8 text-sm text-gray-500">Last Updated: June 21, 2026</p>
 
           <p className="mt-4 text-gray-700 text-base leading-relaxed">
-            This Privacy Policy describes how Amera IoT, Inc. (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or
-            &ldquo;our&rdquo;) collects, uses, and shares your personal information when you visit or
-            make a purchase from ameraiot.com (the &ldquo;Site&rdquo;).
+            This Privacy Policy describes how Amera IoT, Inc. (&ldquo;we,&rdquo; &ldquo;us,&rdquo;
+            or &ldquo;our&rdquo;) collects, uses, and shares your personal information when you
+            visit or make a purchase from ameraiot.com (the &ldquo;Site&rdquo;).
           </p>
 
           <div className="mt-10 space-y-10">

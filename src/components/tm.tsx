@@ -34,14 +34,14 @@ export function tm(text: string, opts?: { markClassName?: string }): React.React
       nodes.push(
         <sup key={key++} className={markClass}>
           {symbol}
-        </sup>,
+        </sup>
       );
     } else if (match[3]) {
       // Standalone ®/™ symbol.
       nodes.push(
         <sup key={key++} className={markClass}>
           {match[3]}
-        </sup>,
+        </sup>
       );
     }
 
