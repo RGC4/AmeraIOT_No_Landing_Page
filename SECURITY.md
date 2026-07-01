@@ -95,6 +95,32 @@ days. To make reports **actionable**, set the environment variable
 - **Resilient:** the forward is bounded by a 3-second timeout and never throws —
   a slow or down webhook can't break the report endpoint or the site.
 
+#### Per-IP rate limit (best-effort by default; shared store optional)
+
+The endpoint is unauthenticated, so it carries a per-IP rate limit
+(`RATE_LIMIT_MAX` requests per `RATE_LIMIT_WINDOW_MS`). A genuine browser sends
+tiny, infrequent reports and never approaches it.
+
+- **Default (no config): deliberate best-effort speed bump.** The counter lives
+  in the function's memory. On Vercel each serverless instance has its own
+  memory and cold starts spin up fresh ones, so this limit is **per-instance,
+  not a global quota** — a determined abuser spread across instances can exceed
+  the cap. This is an **accepted trade-off** for a low-value endpoint whose worst
+  case is extra log lines (already capped per request and bounded in memory); we
+  don't add infrastructure for a threat we haven't observed.
+- **Optional: enforce it globally across instances.** Point the endpoint at a
+  shared store and the limit holds cluster-wide. Set **either** the Upstash
+  Redis REST pair (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`) **or**
+  the Vercel KV pair (`KV_REST_API_URL` + `KV_REST_API_TOKEN`, which is Upstash
+  under the hood) in **Vercel → Project → Settings → Environment Variables**.
+  The handler talks to the store over plain HTTPS `fetch` (a single
+  `INCR` + `PEXPIRE …NX` pipeline) — **no SDK, no npm dependency**, so nothing
+  ships until the vars are present. Treat the tokens as **secrets**.
+- **Fail-open:** if the shared store is slow or unreachable (1 s timeout), the
+  handler silently falls back to the in-memory limit rather than block. A KV
+  outage can never swallow a genuine browser report — real reports still get a
+  204.
+
 Reporting via the CSP directives is **production-only** — the `report-to` /
 `report-uri` directives and their headers are gated behind
 `NODE_ENV === 'production'`, so local dev (with its relaxed dev CSP) does not

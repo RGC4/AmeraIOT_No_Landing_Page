@@ -17,7 +17,9 @@ import { NextRequest, NextResponse } from 'next/server';
 // genuine reports:
 //   - A hard cap on the request body size, enforced while streaming so an
 //     attacker cannot make us buffer an unbounded payload.
-//   - A best-effort per-IP rate limit (in-memory; see note below).
+//   - A per-IP rate limit. When a shared store (Upstash Redis / Vercel KV) is
+//     configured it is enforced GLOBALLY across serverless instances; otherwise
+//     it degrades to a best-effort in-memory speed bump (see note below).
 //   - A cap on how many individual reports we process/log per request.
 // Genuine browser CSP reports are tiny and infrequent, so they comfortably stay
 // under every limit and still get a 204.
@@ -31,12 +33,36 @@ const MAX_BODY_BYTES = 16 * 1024;
 // array of reports can't flood the logs.
 const MAX_REPORTS_PER_REQUEST = 50;
 
-// Best-effort per-IP rate limit. NOTE: serverless instances (Vercel) are
-// ephemeral and not shared, so this counter is per-instance, not global — it is
-// a cheap, dependency-free speed bump against a single abusive source, not a
-// hard quota. A genuine browser never approaches this rate.
+// Per-IP rate limit: at most RATE_LIMIT_MAX requests per RATE_LIMIT_WINDOW_MS
+// from a single source. A genuine browser never approaches this rate.
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 100;
+
+// --- Shared, cross-instance rate limit (optional) --------------------------
+// The in-memory counter below only sees traffic that lands on THIS serverless
+// instance. On Vercel each instance has its own memory (and cold starts spin up
+// fresh ones), so under real load the in-memory limit is per-instance, not a
+// global quota — a determined abuser spread across instances can exceed the cap.
+//
+// To make the limit actually hold across instances, point the endpoint at a
+// shared store by setting either the Upstash Redis REST vars
+// (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`) or the equivalent
+// Vercel KV vars (`KV_REST_API_URL` + `KV_REST_API_TOKEN`, which are Upstash
+// under the hood). We talk to it over plain HTTPS `fetch` — no SDK, no npm
+// dependency — so this adds nothing to the bundle and stays a no-op until the
+// vars are present. See SECURITY.md → "CSP violation reporting".
+//
+// When the vars are NOT set (the default), behaviour is unchanged: the limit is
+// the deliberate best-effort in-memory speed bump against a single abusive
+// source, not a hard quota. That is an accepted choice for this low-value,
+// unauthenticated endpoint until abuse is actually observed.
+const KV_REST_URL = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+const KV_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+const KV_ENABLED = Boolean(KV_REST_URL && KV_REST_TOKEN);
+// Keep the shared-store call snappy: if it can't answer quickly we fall back to
+// the in-memory limit rather than delay (or drop) a genuine report.
+const KV_TIMEOUT_MS = 1_000;
+
 const hits = new Map<string, { count: number; resetAt: number }>();
 
 function getClientIp(request: NextRequest): string {
@@ -45,6 +71,7 @@ function getClientIp(request: NextRequest): string {
   return request.headers.get('x-real-ip') ?? 'unknown';
 }
 
+// In-memory, per-instance fixed-window counter. Cheap and dependency-free.
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = hits.get(ip);
@@ -62,6 +89,49 @@ function isRateLimited(ip: string): boolean {
 
   entry.count += 1;
   return entry.count > RATE_LIMIT_MAX;
+}
+
+// Cross-instance fixed-window counter backed by Upstash Redis / Vercel KV over
+// their REST API. Returns:
+//   - true/false  → the shared verdict (limited or not);
+//   - null        → the store is not configured OR was unreachable, so the
+//                   caller should fall back to the in-memory limit. We fail OPEN
+//                   (never block on infrastructure trouble) so a KV outage can
+//                   never swallow a genuine browser report.
+// The pipeline does INCR then PEXPIRE …NX, so the window is set exactly once per
+// window (the first hit) and the counter self-expires — no key ever leaks.
+async function isRateLimitedShared(ip: string): Promise<boolean | null> {
+  if (!KV_ENABLED) return null;
+
+  const key = `csp-rl:${ip}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), KV_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${KV_REST_URL}/pipeline`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${KV_REST_TOKEN}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify([
+        ['INCR', key],
+        ['PEXPIRE', key, RATE_LIMIT_WINDOW_MS, 'NX'],
+      ]),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as Array<{ result?: unknown; error?: string }>;
+    const count = Number(data?.[0]?.result);
+    if (!Number.isFinite(count)) return null;
+    return count > RATE_LIMIT_MAX;
+  } catch {
+    // Timeout / network / parse error → fall back to the in-memory limit.
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // --- Forwarding to an external alert channel --------------------------------
@@ -248,8 +318,15 @@ function normalize(payload: unknown): CspViolationFields[] {
 }
 
 export async function POST(request: NextRequest) {
-  // 1) Cheap per-IP rate-limit check before doing any work.
-  if (isRateLimited(getClientIp(request))) {
+  // 1) Per-IP rate-limit check before doing any work. Prefer the shared,
+  //    cross-instance store when it's configured so the limit holds globally on
+  //    serverless; otherwise (or if it's unreachable) fall back to the in-memory
+  //    per-instance speed bump. `null` from the shared check means "not
+  //    configured / failed" → defer to in-memory; a `false` verdict short-
+  //    circuits (`false ?? …` stays false) so we don't double-count.
+  const ip = getClientIp(request);
+  const limited = (await isRateLimitedShared(ip)) ?? isRateLimited(ip);
+  if (limited) {
     return new NextResponse(null, {
       status: 429,
       headers: { 'Retry-After': String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)) },
