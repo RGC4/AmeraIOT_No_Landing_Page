@@ -87,7 +87,7 @@ export default function HomePage() {
       {/* CEO Quote — full-width blue band flush against hero */}
       <section className="relative -mt-px w-screen left-1/2 -translate-x-1/2 bg-[#134C8C]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-4 sm:pt-4 sm:pb-5">
-          <p className="text-base sm:text-lg italic text-white leading-relaxed">
+          <p className="text-[0.8rem] sm:text-[0.9rem] italic text-white leading-relaxed">
             &ldquo;In a world racing toward Q-Day, where quantum computers threaten to break
             traditional encryption, AMERA
             <Reg /> delivers a revolutionary solution: deterministic symmetric keys generated
