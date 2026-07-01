@@ -68,23 +68,23 @@ export default function HomePage() {
       <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-primary-dark">
         {heroReady ? (
           <video
-            src="/assets/hero-tidal-wave-7-1-2026-v2.mp4"
-            poster="/assets/hero-tidal-wave-2-v1-poster.jpg"
+            src="/assets/hero-tidal-wave-7-1-2026-v4.mp4"
+            poster="/assets/hero-tidal-wave-7-1-2026-v4-poster.jpg"
             autoPlay
             muted
             loop
             playsInline
             preload="none"
-            className="block w-full h-[calc(100vh-230px)] object-cover"
+            className="block w-full h-auto object-contain lg:h-[calc(100vh-230px)] lg:object-cover"
           />
         ) : (
           <Image
-            src="/assets/hero-tidal-wave-2-v1-poster.jpg"
+            src="/assets/hero-tidal-wave-7-1-2026-v4-poster.jpg"
             alt=""
             width={1920}
             height={1080}
             priority
-            className="block w-full h-[calc(100vh-230px)] object-cover"
+            className="block w-full h-auto object-contain lg:h-[calc(100vh-230px)] lg:object-cover"
           />
         )}
       </section>
