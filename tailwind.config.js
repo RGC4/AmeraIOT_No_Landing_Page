@@ -12,6 +12,10 @@ module.exports = {
         heading: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       colors: {
+        brand: {
+          DEFAULT: '#114D8F',
+          dark: '#0E3F75',
+        },
         primary: {
           light: '#6fb3e0',
           DEFAULT: '#4D9FD6',

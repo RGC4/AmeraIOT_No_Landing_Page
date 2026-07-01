@@ -92,7 +92,7 @@ export default function Header() {
           </div>
           <Link
             href="/contact"
-            className="hidden md:inline-flex items-center gap-2 bg-[#114D8F] hover:bg-[#0E3F75] text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors duration-200">
+            className="hidden md:inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors duration-200">
             Contact Us
           </Link>
           <button
@@ -146,7 +146,7 @@ export default function Header() {
             <Link
               href="/contact"
               onClick={() => setOpen(false)}
-              className="mt-4 inline-flex items-center justify-center gap-2 bg-[#114D8F] hover:bg-[#0E3F75] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors duration-200">
+              className="mt-4 inline-flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors duration-200">
               Contact Us
             </Link>
           </nav>
