@@ -74,7 +74,7 @@ export default function HomePage() {
             loop
             playsInline
             preload="none"
-            className="block w-full h-auto aspect-video object-contain lg:aspect-auto lg:h-[78vh] lg:object-cover lg:object-top"
+            className="block w-full h-auto aspect-video object-contain lg:aspect-auto lg:h-[78vh] lg:object-cover lg:object-[50%_20%]"
           />
         ) : (
           <div
