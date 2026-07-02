@@ -66,8 +66,9 @@ Useful variants:
   nothing. Good for a sanity check before publishing.
 - `npm run publish -- --skip-git` — only sync images to Bunny.
 - `npm run publish -- --skip-media` — only push code to GitHub.
-- `npm run publish -- --prune` — also remove files on GitHub that you deleted
-  locally (off by default for safety).
+- `npm run publish -- --prune` — also remove files on GitHub and Bunny that you
+  deleted locally, including any Bunny folders left empty afterwards (off by
+  default for safety).
 - `npm run publish -- --force` — only needed if publishing stops with a warning
   that "GitHub has changed since your last publish." That safety check means the
   repo was edited somewhere other than this workspace; `--force` publishes your

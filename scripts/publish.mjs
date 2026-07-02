@@ -7,6 +7,7 @@
 //   npm run publish -- --skip-git     only sync images to Bunny
 //   npm run publish -- --prune        also delete files removed locally from BOTH
 //                                     GitHub and the Bunny CDN storage zone
+//                                     (plus any Bunny folders left empty)
 //   npm run publish -- --force        publish even if GitHub changed outside this workspace
 //
 // Nothing in this repo goes live until you run this. Editing + previewing
@@ -106,15 +107,19 @@ async function bunnyFetch(url, opts = {}, { attempts = 4 } = {}) {
   return { ok: false, status: 0, _error: last };
 }
 
-async function listBunny(dirPath, map) {
+async function listBunny(dirPath, map, dirs) {
   const url = `https://${BUNNY_STORAGE_HOST}/${BUNNY_ZONE}/${dirPath}/`;
   const r = await bunnyFetch(url, { headers: { AccessKey: storageKey, Accept: 'application/json' } });
   if (r.status === 404) return map; // folder doesn't exist yet
   if (!r.ok) die(`Bunny listing failed for /${dirPath} (${r._error || 'HTTP ' + r.status}). If this keeps happening, check BUNNY_STORAGE_PASSWORD.`);
   for (const it of await r.json()) {
     const rel = `${dirPath}/${it.ObjectName}`;
-    if (it.IsDirectory) await listBunny(rel, map);
-    else map.set(rel, (it.Checksum || '').toUpperCase());
+    if (it.IsDirectory) {
+      dirs.add(rel);
+      await listBunny(rel, map, dirs);
+    } else {
+      map.set(rel, (it.Checksum || '').toUpperCase());
+    }
   }
   return map;
 }
@@ -129,8 +134,9 @@ async function uploadBunny(localFile, remotePath) {
   if (!r.ok) die(`Upload failed for ${remotePath} (${r._error || 'HTTP ' + r.status}).`);
 }
 
-async function deleteBunny(remotePath) {
-  const url = `https://${BUNNY_STORAGE_HOST}/${BUNNY_ZONE}/${remotePath}`;
+async function deleteBunny(remotePath, { isDirectory = false } = {}) {
+  // Bunny storage treats a trailing slash as "delete this folder".
+  const url = `https://${BUNNY_STORAGE_HOST}/${BUNNY_ZONE}/${remotePath}${isDirectory ? '/' : ''}`;
   const r = await bunnyFetch(url, { method: 'DELETE', headers: { AccessKey: storageKey } });
   // A 404 means it's already gone — treat that as success.
   if (!r.ok && r.status !== 404) die(`Delete failed for ${remotePath} (${r._error || 'HTTP ' + r.status}).`);
@@ -150,7 +156,8 @@ async function syncMedia() {
   if (!storageKey) die('Missing BUNNY_STORAGE_PASSWORD.');
   if (!existsSync(ASSETS_DIR)) { log('  No public/assets folder; nothing to sync.'); return; }
 
-  const remote = await listBunny(REMOTE_PREFIX, new Map());
+  const remoteDirs = new Set();
+  const remote = await listBunny(REMOTE_PREFIX, new Map(), remoteDirs);
   const localFiles = walk(ASSETS_DIR);
 
   const localRemotePaths = new Set();
@@ -213,6 +220,33 @@ async function syncMedia() {
       }
     } else {
       log(`  ${orphans.length} file(s) on Bunny CDN have no local match; run with --prune to remove them.`);
+    }
+  }
+
+  // After pruning orphan files, folders under assets/ can be left empty (Bunny
+  // storage keeps folders independently of their contents). Remove any folder
+  // that ends up with no surviving files, deepest first so children go before
+  // parents. A folder survives only if a local file lives under it — everything
+  // remote-only under it was just deleted (or was already an empty folder).
+  if (PRUNE && remoteDirs.size) {
+    const emptyDirs = [...remoteDirs]
+      .filter((d) => {
+        const prefix = `${d}/`;
+        for (const f of localRemotePaths) if (f.startsWith(prefix)) return false;
+        return true;
+      })
+      .sort((a, b) => b.split('/').length - a.split('/').length);
+
+    if (emptyDirs.length) {
+      log(`  ${emptyDirs.length} empty folder(s) on Bunny CDN after pruning:`);
+      for (const d of emptyDirs) log(`    delete  ${d}/`);
+      if (DRY) {
+        log('  (dry run — not deleting)');
+      } else {
+        // Sequential, deepest first: each folder must be empty before delete.
+        for (const d of emptyDirs) await deleteBunny(d, { isDirectory: true });
+        log(`  ${emptyDirs.length} empty folder(s) removed from CDN.`);
+      }
     }
   }
 }
