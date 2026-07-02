@@ -68,7 +68,7 @@ export default function HomePage() {
       <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#020B1F]">
         {heroReady ? (
           <video
-            src="/assets/hero-tidal-wave-v10.mp4"
+            src="/assets/hero-tidal-wave-v11.mp4"
             autoPlay
             muted
             loop
