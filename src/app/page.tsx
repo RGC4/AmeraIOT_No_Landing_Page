@@ -74,12 +74,12 @@ export default function HomePage() {
             loop
             playsInline
             preload="none"
-            className="block w-full h-auto aspect-video object-contain"
+            className="block w-full h-auto aspect-video object-contain lg:aspect-auto lg:h-[78vh] lg:object-cover lg:object-top"
           />
         ) : (
           <div
             aria-hidden
-            className="block w-full aspect-video bg-[#020B1F]"
+            className="block w-full aspect-video lg:aspect-auto lg:h-[78vh] bg-[#020B1F]"
           />
         )}
       </section>
