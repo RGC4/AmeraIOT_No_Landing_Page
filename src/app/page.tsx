@@ -65,7 +65,7 @@ export default function HomePage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#020B1F] lg:h-screen lg:min-h-[700px]">
+      <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#020B1F]">
         {heroReady ? (
           <video
             src="/assets/hero-tidal-wave-v16.mp4"
@@ -74,13 +74,10 @@ export default function HomePage() {
             loop
             playsInline
             preload="none"
-            className="block w-full h-auto object-contain lg:absolute lg:inset-0 lg:h-full lg:object-cover lg:object-top"
+            className="block w-full h-auto aspect-video"
           />
         ) : (
-          <div
-            aria-hidden
-            className="block w-full aspect-video lg:aspect-auto lg:absolute lg:inset-0 lg:h-full bg-[#020B1F]"
-          />
+          <div aria-hidden className="block w-full aspect-video bg-[#020B1F]" />
         )}
       </section>
 
