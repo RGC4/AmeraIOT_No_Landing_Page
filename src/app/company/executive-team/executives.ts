@@ -40,16 +40,6 @@ Glenn pursued a parallel career in the U.S. Army, completing 35 years of service
 He is president of the Silicon Valley chapter of AFCEA International, which promotes networking and information exchange among the defense, enterprise, and education sectors.`,
   },
   {
-    name: 'Curt Simmons',
-    title: 'Vice President, Sales',
-    image: '/assets/exec-curt-simmons-v4.png',
-    bio: `Curt Simmons is a seasoned technology sales executive with more than 25 years of success leading revenue growth, building high-performing teams, and developing strategic partnerships across security, AI, cloud, and data protection markets. He has held leadership roles in both early-stage startups and established global software companies, consistently outperforming revenue targets and driving geographic expansion in North America, Latin America, and Federal markets.
-
-Over the course of his career, his execution has produced standout results including five acquisitions. As a trusted leader, he is known for forging deep alliances with enterprise customers, OEMs, and global systems integrators.
-
-Curt holds a Bachelor of Science in Marketing from Robert Morris University, where he also captained the Men\u2019s Division I golf team, reflecting a lifelong commitment to performance, discipline, and competitive excellence.`,
-  },
-  {
     name: 'Holly Notko',
     title: 'Marketing & Client Services',
     image: '/assets/exec-holly-notko.png',
