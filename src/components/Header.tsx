@@ -9,7 +9,6 @@ import { tm } from '../components/tm';
 const productItems = [{ href: '/products/amerakey', label: 'AmeraKey' }];
 
 const companyItems = [
-  { href: '/company', label: 'Company Overview' },
   { href: '/company/vision-and-mission', label: 'Vision and Mission' },
   { href: '/company/executive-team', label: 'Executive Team' },
   { href: '/company/board-of-advisors', label: 'Board of Advisors' },
