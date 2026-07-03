@@ -429,7 +429,18 @@ async function startServer() {
     await runBuild();
     console.log(`Starting "next start -p ${port}" (production CSP)...`);
   } else {
-    console.log(`No server reachable at ${BASE_URL}; starting "next dev -p ${port}"...`);
+    // Grace period: the main "Start application" workflow may still be booting.
+    // Waiting here avoids stealing its port and leaving it stuck in EADDRINUSE.
+    console.log(`No server reachable at ${BASE_URL}; waiting up to 90s for the app workflow...`);
+    const grace = Date.now() + 90000;
+    while (Date.now() < grace) {
+      if (await reachable(BASE_URL)) {
+        console.log(`Server appeared at ${BASE_URL}; reusing it.`);
+        return null;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    console.log(`Still no server at ${BASE_URL}; starting "next dev -p ${port}"...`);
   }
 
   const command = PROD ? ['next', 'start', '-p', port] : ['next', 'dev', '-p', port];
