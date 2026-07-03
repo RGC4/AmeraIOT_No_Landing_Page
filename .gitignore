@@ -91,3 +91,4 @@ turbo/
 !.env.example
 
 .next/cache/
+public/site-map.png
