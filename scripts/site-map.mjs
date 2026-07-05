@@ -8,7 +8,22 @@
 import { execSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
-import puppeteer from 'puppeteer-core';
+
+/**
+ * puppeteer-core is a heavy, local-only tool dependency. It is deliberately NOT
+ * listed in package.json so it never gets installed during the Vercel build.
+ * Load it here, installing on demand (without saving to package.json) the first
+ * time this script runs in a fresh workspace.
+ */
+async function loadPuppeteer() {
+  try {
+    return (await import('puppeteer-core')).default;
+  } catch {
+    console.log('First run: installing puppeteer-core locally (not saved to package.json)...');
+    execSync('npm install puppeteer-core --no-save --no-audit --no-fund', { stdio: 'inherit' });
+    return (await import('puppeteer-core')).default;
+  }
+}
 
 const BASE = process.env.SITEMAP_BASE_URL || 'http://localhost:5000';
 const SHOT_DIR = '/tmp/sitemap-shots';
@@ -98,6 +113,7 @@ async function main() {
   mkdirSync(SHOT_DIR, { recursive: true });
   mkdirSync(OUT_DIR, { recursive: true });
 
+  const puppeteer = await loadPuppeteer();
   const browser = await puppeteer.launch({
     executablePath: findChromium(),
     headless: 'new',
