@@ -126,7 +126,7 @@ To switch to `cdn.ameraiot.com` (owner steps, in this order):
    - **Name:** `cdn` (i.e. `cdn.ameraiot.com`)
    - **Value:** `ameraiot.b-cdn.net`
    - **TTL:** 300
-3. Verify it works: `https://cdn.ameraiot.com/assets/og-default-v2.jpg` should
+3. Verify it works: `https://cdn.ameraiot.com/assets/og-default-v3.jpg` should
    load an image over HTTPS.
 4. Only **after** step 3 succeeds: in **Vercel → Project → Settings →
    Environment Variables** set `ASSET_CDN_BASE = https://cdn.ameraiot.com`
@@ -138,7 +138,7 @@ Do **not** point `ASSET_CDN_BASE` at `cdn.ameraiot.com` before steps 1–3 are
 live, or every image/video will 404.
 
 The **social share preview** (the card shown when the site is texted/linked) is
-the AMERA shield+logo splash at `public/assets/og-default-v2.jpg` (1200×630),
+the AMERA shield+logo splash at `public/assets/og-default-v3.jpg` (1200×630),
 set as `DEFAULT_OG_IMAGE` in `src/lib/seo.ts`. Reused OG filenames are cached for
 weeks by both the CDN and link scrapers, so replace it with a **new** filename
 (e.g. `-v3`) rather than overwriting.

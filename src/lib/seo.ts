@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const SITE_URL = 'https://ameraiot.com';
 export const SITE_NAME = 'Amera®';
-export const DEFAULT_OG_IMAGE = '/assets/og-default-v2.jpg';
+export const DEFAULT_OG_IMAGE = '/assets/og-default-v3.jpg';
 
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
