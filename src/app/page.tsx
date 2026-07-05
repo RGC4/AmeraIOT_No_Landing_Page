@@ -56,7 +56,9 @@ const metrics = [
 
 export default function HomePage() {
   const [heroReady, setHeroReady] = useState(false);
+  const [heroMobile, setHeroMobile] = useState(false);
   useEffect(() => {
+    setHeroMobile(window.matchMedia('(max-width: 1023px)').matches);
     setHeroReady(true);
   }, []);
 
@@ -68,18 +70,24 @@ export default function HomePage() {
       <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#020B1F]">
         {heroReady ? (
           <video
-            src="/assets/hero-tidal-wave-v18.mp4"
+            src={
+              heroMobile
+                ? '/assets/hero-tidal-wave-mobile-v19.mp4'
+                : '/assets/hero-tidal-wave-v19.mp4'
+            }
+            poster="/assets/hero-poster-v1.jpg"
             autoPlay
             muted
             loop
             playsInline
-            preload="none"
+            preload="metadata"
             className="block w-full h-auto aspect-video object-contain lg:aspect-auto lg:h-[78vh] lg:object-cover lg:object-[50%_40%]"
           />
         ) : (
           <div
             aria-hidden
-            className="block w-full aspect-video lg:aspect-auto lg:h-[78vh] bg-[#020B1F]"
+            className="block w-full aspect-video lg:aspect-auto lg:h-[78vh] bg-cover bg-center bg-[#020B1F]"
+            style={{ backgroundImage: "url('/assets/hero-poster-v1.jpg')" }}
           />
         )}
       </section>
