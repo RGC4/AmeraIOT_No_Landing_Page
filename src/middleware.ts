@@ -83,6 +83,20 @@ function buildCsp(nonce: string): string {
 }
 
 export function middleware(request: NextRequest) {
+  // The Downloads section was retired. Return 410 Gone (not a soft 404) for
+  // /downloads and anything beneath it so search engines drop the stale link
+  // that Google still lists as a sitelink.
+  const { pathname } = request.nextUrl;
+  if (pathname === '/downloads' || pathname.startsWith('/downloads/')) {
+    return new NextResponse('Gone. This page is no longer available.', {
+      status: 410,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+  }
+
   // Per-request nonce. Generated for every request; only referenced by the CSP
   // in production, but always exposed via 'x-nonce' so server components can
   // attach it consistently across environments.
