@@ -34,6 +34,10 @@ args = "csp-report"
 task = "workflow.run"
 args = "structured-data-validators"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "legacy-redirects"
+
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -86,6 +90,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run check:structured-data:validators"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "legacy-redirects"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run check:legacy-redirects"
 
 [workflows.workflow.metadata]
 isValidation = true
