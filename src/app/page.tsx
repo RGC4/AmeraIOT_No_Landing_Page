@@ -124,7 +124,7 @@ export default function HomePage() {
 
       {/* Page Content */}
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <h1 className="sr-only">Amera Technologies — Post-Quantum Encryption Platform</h1>
+        <h1 className="sr-only">Amera® — Post-Quantum Encryption Platform</h1>
         {/* Hero CTAs */}
         <div className="mb-6 flex justify-center">
           <Link

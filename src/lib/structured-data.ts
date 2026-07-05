@@ -16,7 +16,7 @@ import { industryMeta } from '@/app/industries/[slug]/industry-meta';
 const companySchema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
-  name: 'Company — Amera Technologies',
+  name: 'Company — Amera®',
   description:
     'AMERA IoT Inc. — frictionless, quantum-proof security that keeps you in control of your data.',
   url: 'https://ameraiot.com/company',
@@ -30,14 +30,14 @@ const companySchema = {
   publisher: {
     '@type': 'Organization',
     '@id': 'https://ameraiot.com/#organization',
-    name: 'Amera Technologies',
+    name: 'Amera®',
   },
 };
 
 const advisorsSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'Amera Technologies Board of Advisors',
+  name: 'Amera® Board of Advisors',
   url: 'https://ameraiot.com/company/board-of-advisors',
   breadcrumb: {
     '@type': 'BreadcrumbList',
@@ -62,7 +62,7 @@ const advisorsSchema = {
       worksFor: {
         '@type': 'Organization',
         '@id': 'https://ameraiot.com/#organization',
-        name: 'Amera Technologies',
+        name: 'Amera®',
       },
     },
   })),
@@ -71,7 +71,7 @@ const advisorsSchema = {
 const execSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'Amera Technologies Executive Team',
+  name: 'Amera® Executive Team',
   url: 'https://ameraiot.com/company/executive-team',
   breadcrumb: {
     '@type': 'BreadcrumbList',
@@ -96,7 +96,7 @@ const execSchema = {
       worksFor: {
         '@type': 'Organization',
         '@id': 'https://ameraiot.com/#organization',
-        name: 'Amera Technologies',
+        name: 'Amera®',
       },
     },
   })),
@@ -112,7 +112,7 @@ const resourcesSchema = {
   publisher: {
     '@type': 'Organization',
     '@id': 'https://ameraiot.com/#organization',
-    name: 'Amera Technologies',
+    name: 'Amera®',
   },
   hasPart: [
     {
@@ -148,7 +148,7 @@ const amerasecretsSchema = {
   brand: {
     '@type': 'Organization',
     '@id': 'https://ameraiot.com/#organization',
-    name: 'Amera Technologies',
+    name: 'Amera®',
   },
   category: 'Enterprise Secrets Management Software',
 };
@@ -163,7 +163,7 @@ const amerakeySchema = {
   brand: {
     '@type': 'Organization',
     '@id': 'https://ameraiot.com/#organization',
-    name: 'Amera Technologies',
+    name: 'Amera®',
   },
   category: 'Cryptography Software',
 };
@@ -171,14 +171,14 @@ const amerakeySchema = {
 const industriesSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Industry Use Cases — Amera Technologies',
+  name: 'Industry Use Cases — Amera®',
   description:
     'Explore how Amera post-quantum encryption and key governance serves manufacturing, oil & gas, utilities, financial services, government, maritime, healthcare, and more.',
   url: 'https://ameraiot.com/industries',
   publisher: {
     '@type': 'Organization',
     '@id': 'https://ameraiot.com/#organization',
-    name: 'Amera Technologies',
+    name: 'Amera®',
   },
 };
 

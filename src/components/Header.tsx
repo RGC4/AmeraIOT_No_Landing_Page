@@ -52,7 +52,7 @@ export default function Header() {
             <Link href="/" className="flex items-center gap-0.5" onClick={() => setOpen(false)}>
               <Image
                 src="/assets/amera-logo-black.png"
-                alt="Amera"
+                alt="Amera®"
                 width={135}
                 height={45}
                 className="h-[45px] w-[135px] shrink-0"

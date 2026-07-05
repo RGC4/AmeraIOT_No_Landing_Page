@@ -1,6 +1,6 @@
-# Amera Technologies
+# Amera®
 
-Amera Technologies builds certificate-free machine identity and deterministic key governance infrastructure for OT, IT, and classified networks. Our products eliminate internal PKI complexity, stop silent certificate expiry, and deliver hardware-rooted identity at scale — with no cloud dependency.
+Amera® builds certificate-free machine identity and deterministic key governance infrastructure for OT, IT, and classified networks. Our products eliminate internal PKI complexity, stop silent certificate expiry, and deliver hardware-rooted identity at scale — with no cloud dependency.
 
 ## Key Pages
 

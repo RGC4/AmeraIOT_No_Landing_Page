@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { pageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Board of Advisors — Amera Technologies',
+  title: 'Board of Advisors — Amera®',
   description:
-    'Meet the board of advisors guiding Amera Technologies in security, identity, and critical infrastructure.',
+    'Meet the board of advisors guiding Amera® in security, identity, and critical infrastructure.',
   path: '/company/board-of-advisors',
 });
 

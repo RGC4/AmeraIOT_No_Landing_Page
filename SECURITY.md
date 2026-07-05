@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-This is the source for the Amera Technologies marketing website. Only the
+This is the source for the Amera® marketing website. Only the
 currently deployed `main` branch is supported and receives security updates.
 
 | Version            | Supported          |

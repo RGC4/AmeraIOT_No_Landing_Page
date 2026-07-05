@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { pageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Vision & Mission — Amera Technologies',
+  title: 'Vision & Mission — Amera®',
   description:
     "Amera's vision and mission: eliminating PKI complexity and delivering deterministic machine identity at scale.",
   path: '/company/vision-and-mission',

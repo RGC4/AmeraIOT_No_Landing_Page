@@ -26,7 +26,7 @@ export async function generateMetadata({
   const label = slugLabels[slug] ?? slug;
   const meta = industryMeta[slug];
   return pageMetadata({
-    title: `${label} — Amera Technologies`,
+    title: `${label} — Amera®`,
     description: `Amera delivers certificate-free machine identity and automated key governance for the ${label} sector.`,
     path: `/industries/${slug}`,
     image: meta?.image,

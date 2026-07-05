@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { pageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Contact — Amera Technologies',
+  title: 'Contact — Amera®',
   description:
-    'Get in touch with Amera Technologies to learn more about certificate-free identity and key governance solutions.',
+    'Get in touch with Amera® to learn more about certificate-free identity and key governance solutions.',
   path: '/contact',
 });
 

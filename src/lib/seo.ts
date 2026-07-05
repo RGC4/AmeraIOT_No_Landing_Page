@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 
 export const SITE_URL = 'https://ameraiot.com';
-export const SITE_NAME = 'Amera Technologies';
+export const SITE_NAME = 'Amera®';
 export const DEFAULT_OG_IMAGE = '/assets/og-default.jpg';
 
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
 
 interface PageMetaInput {
-  /** Full <title> for the page (e.g. "Industries — Amera Technologies"). */
+  /** Full <title> for the page (e.g. "Industries — Amera®"). */
   title: string;
   /** Search/social description, ~150–160 chars. */
   description: string;

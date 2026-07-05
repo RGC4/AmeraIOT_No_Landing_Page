@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   ...pageMetadata({
-    title: 'Amera Technologies — Certificate-Free Identity & Key Governance',
+    title: 'Amera® — Certificate-Free Identity & Key Governance',
     description:
       'Amera delivers deterministic, hardware-rooted machine identity and automated key governance — eliminating PKI complexity across OT, IT, and classified networks.',
     path: '',
@@ -37,7 +37,7 @@ const siteSchema = {
     {
       '@type': 'Organization',
       '@id': 'https://ameraiot.com/#organization',
-      name: 'Amera Technologies',
+      name: 'Amera®',
       alternateName: 'AMERA IoT Inc.',
       url: 'https://ameraiot.com',
       logo: {
@@ -51,7 +51,7 @@ const siteSchema = {
       '@type': 'WebSite',
       '@id': 'https://ameraiot.com/#website',
       url: 'https://ameraiot.com',
-      name: 'Amera Technologies',
+      name: 'Amera®',
       publisher: { '@id': 'https://ameraiot.com/#organization' },
     },
   ],

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { pageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Industries — Amera Technologies',
+  title: 'Industries — Amera®',
   description:
     'Amera secures critical infrastructure across manufacturing, energy, financial services, government, healthcare, and more.',
   path: '/industries',

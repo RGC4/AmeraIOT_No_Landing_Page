@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { pageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Privacy Policy — Amera Technologies',
+  title: 'Privacy Policy — Amera®',
   description:
-    'Privacy policy for Amera Technologies — how we collect, use, and protect your information.',
+    'Privacy policy for Amera® — how we collect, use, and protect your information.',
   path: '/privacy-policy',
 });
 
