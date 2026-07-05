@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import { headers } from 'next/headers';
 import JsonLd from '@/components/JsonLd';
 import RouteStructuredData from '@/components/RouteStructuredData';
 import { pageMetadata, SITE_URL } from '@/lib/seo';
@@ -57,17 +56,15 @@ const siteSchema = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
-
   return (
     <html lang="en" className={inter.variable}>
       <body className="font-sans">
-        <JsonLd data={siteSchema} nonce={nonce} />
+        <JsonLd data={siteSchema} />
         <RouteStructuredData />
         {children}
       </body>

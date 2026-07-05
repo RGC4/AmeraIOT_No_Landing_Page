@@ -13,24 +13,14 @@ function serialize(data: unknown): string {
 }
 
 /**
- * Server-renderable JSON-LD <script> block. The `nonce` is sourced from the
- * per-request CSP nonce (see src/middleware.ts) so the structured data is
- * allowed under a strict `script-src 'self' 'nonce-...' 'strict-dynamic'`
- * policy with no `'unsafe-inline'`.
- *
- * `suppressHydrationWarning` is required here: for security, browsers blank out
- * the `nonce` attribute in the DOM once the page has loaded. On hydration React
- * reads that emptied attribute, compares it to the nonce it still holds, and
- * (correctly seeing a difference) logs a hydration mismatch. The script is fine
- * — the nonce was applied at parse time — so we tell React not to warn on this
- * element's attributes rather than dropping the nonce.
+ * Renders a JSON-LD <script> block. `type="application/ld+json"` is inert data,
+ * not executable script, and the production CSP allows inline scripts, so no
+ * nonce is needed.
  */
-export default function JsonLd({ data, nonce }: { data: unknown; nonce?: string }) {
+export default function JsonLd({ data }: { data: unknown }) {
   return (
     <script
       type="application/ld+json"
-      nonce={nonce}
-      suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: serialize(data) }}
     />
   );

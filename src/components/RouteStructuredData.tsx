@@ -1,20 +1,19 @@
-import { headers } from 'next/headers';
+'use client';
+
+import { usePathname } from 'next/navigation';
 import JsonLd from '@/components/JsonLd';
 import { getRouteStructuredData } from '@/lib/structured-data';
 
 /**
- * Server component that renders the route-specific JSON-LD for the current
- * request. It reads the request path and the per-request CSP nonce from the
- * headers set by src/middleware.ts, so structured data is allowed under the
- * strict, nonce-based `script-src` (no `'unsafe-inline'`).
+ * Renders the route-specific JSON-LD for the current path. It reads the path
+ * with usePathname() rather than the request headers, so the page stays
+ * statically prerenderable and CDN-cacheable. usePathname() is available during
+ * static prerendering, so the structured data is still baked into the HTML.
  */
-export default async function RouteStructuredData() {
-  const headerList = await headers();
-  const pathname = headerList.get('x-pathname') ?? '';
-  const nonce = headerList.get('x-nonce') ?? undefined;
-
+export default function RouteStructuredData() {
+  const pathname = usePathname();
   const data = getRouteStructuredData(pathname);
   if (!data) return null;
 
-  return <JsonLd data={data} nonce={nonce} />;
+  return <JsonLd data={data} />;
 }

@@ -5,12 +5,10 @@ import { industryMeta } from '@/app/industries/[slug]/industry-meta';
 /**
  * Route-level JSON-LD structured data.
  *
- * These schemas were previously embedded as inline <script> blocks inside
- * `'use client'` page components. They now live here so they can be rendered by
- * a server component (see src/components/RouteStructuredData.tsx) that attaches
- * the per-request CSP nonce — allowing us to drop `'unsafe-inline'` from
- * `script-src`. The home/contact/legal pages intentionally have no extra
- * schema; the site-wide Organization/WebSite graph lives in the root layout.
+ * These schemas live here so RouteStructuredData (src/components/
+ * RouteStructuredData.tsx) can look up the right block by pathname and emit it
+ * as JSON-LD. The home/contact/legal pages intentionally have no extra schema;
+ * the site-wide Organization/WebSite graph lives in the root layout.
  */
 
 const companySchema = {

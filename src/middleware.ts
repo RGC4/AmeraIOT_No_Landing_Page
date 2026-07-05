@@ -23,14 +23,15 @@ const IMG_HOSTS = [
 const VIDEO_FRAME_HOSTS = 'https://iframe.mediadelivery.net';
 const VIDEO_MEDIA_HOSTS = 'https://*.b-cdn.net https://iframe.mediadelivery.net';
 
-// Display-only marketing site. In production we run a strict, nonce-based
-// script-src: every inline <script> Next.js emits (framework bootstrap, chunk
-// loaders) plus our own JSON-LD blocks carry the per-request nonce, and
-// 'strict-dynamic' extends that trust to the scripts they load. This lets us
-// drop 'unsafe-inline' for scripts entirely. Next.js reads the nonce from the
-// CSP it finds on the *request* headers (set below) and applies it to its own
-// scripts automatically; our server components read it from the 'x-nonce'
-// header.
+// Display-only marketing site. In production script-src allows the app's own
+// scripts: 'self' for external chunk files plus 'unsafe-inline' for the inline
+// bootstrap/streaming scripts Next.js emits. We intentionally do NOT use a
+// per-request nonce: a unique nonce per request forces Next.js to render every
+// page dynamically (Cache-Control: no-store), which disabled the browser
+// back/forward cache and made mobile Safari intermittently show a blank page.
+// A static CSP lets pages be prerendered and CDN-cached. Residual XSS risk is
+// low: this site renders no untrusted user input, object-src is 'none', and
+// base-uri/form-action are locked to 'self'. See SECURITY.md.
 //
 // style-src deliberately keeps 'unsafe-inline' and must NOT be given a nonce or
 // hash. Under CSP Level 3, 'unsafe-inline' is ignored the moment a nonce/hash
@@ -39,17 +40,18 @@ const VIDEO_MEDIA_HOSTS = 'https://*.b-cdn.net https://iframe.mediadelivery.net'
 // dynamic React style props emit such attributes (color:transparent, object-fit,
 // computed transition-duration) whose values vary at runtime and cannot be
 // enumerated or hashed. Adding a nonce/hash here would break image and carousel
-// rendering for no security gain. Residual risk is low: the JS-execution vector
-// is locked to 'self' + nonce + 'strict-dynamic', object-src is 'none', and the
-// site renders no untrusted user input. See SECURITY.md "Known accepted items".
-function buildCsp(nonce: string): string {
+// rendering for no security gain. Residual risk is low: script-src is limited to
+// 'self' + 'unsafe-inline', object-src is 'none', base-uri/form-action are
+// 'self', and the site renders no untrusted user input. See SECURITY.md
+// "Known accepted items".
+function buildCsp(): string {
   const isDev = process.env.NODE_ENV !== 'production';
-  // Next.js dev (HMR / React Fast Refresh) needs eval + inline scripts + a
-  // websocket channel. These relaxations apply ONLY in development; production
-  // uses the strict nonce-based policy.
+  // Next.js dev (HMR / React Fast Refresh) additionally needs 'unsafe-eval' and
+  // a websocket channel; production keeps 'self' + 'unsafe-inline' (see the
+  // block comment above for why a nonce is intentionally not used).
   const scriptSrc = isDev
     ? `script-src 'self' 'unsafe-inline' 'unsafe-eval'`
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+    : `script-src 'self' 'unsafe-inline'`;
   const connectSrc = isDev
     ? `connect-src 'self' ws: wss: ${VIDEO_MEDIA_HOSTS}`
     : `connect-src 'self' ${VIDEO_MEDIA_HOSTS}`;
@@ -97,20 +99,13 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Per-request nonce. Generated for every request; only referenced by the CSP
-  // in production, but always exposed via 'x-nonce' so server components can
-  // attach it consistently across environments.
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  const csp = buildCsp(nonce);
+  // The CSP is identical for every request (no per-request nonce), so pages
+  // stay statically prerenderable and CDN-cacheable. A per-request nonce used
+  // to force dynamic rendering (Cache-Control: no-store), which broke Safari's
+  // back/forward cache and caused intermittent blank pages on mobile.
+  const csp = buildCsp();
 
-  // Forward the nonce, the resolved CSP, and the pathname on the request so
-  // Next.js can nonce its own scripts and our server components can read them.
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
-  requestHeaders.set('x-pathname', request.nextUrl.pathname);
-  requestHeaders.set('Content-Security-Policy', csp);
-
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  const response = NextResponse.next();
 
   response.headers.set('Content-Security-Policy', csp);
   // Reporting destinations for the CSP `report-to`/`report-uri` directives. Only

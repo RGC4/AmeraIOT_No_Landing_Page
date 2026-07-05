@@ -1,5 +1,4 @@
 import React from 'react';
-import { headers } from 'next/headers';
 import Header from '@/components/Header';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
@@ -78,7 +77,6 @@ function ArticleCard({ item, idx }: { item: Article; idx: number }) {
 }
 
 export default async function NewsPage() {
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
   let articles: Article[] = [];
   let fetchFailed = false;
 
@@ -122,7 +120,7 @@ export default async function NewsPage() {
 
       <NewsHero />
 
-      {itemListSchema && <JsonLd data={itemListSchema} nonce={nonce} />}
+      {itemListSchema && <JsonLd data={itemListSchema} />}
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-14 sm:pb-16">
         {fetchFailed && (

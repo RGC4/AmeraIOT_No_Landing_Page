@@ -136,10 +136,20 @@ channel.
 
 ### Known accepted items
 
-- **CSP `script-src` is nonce-based (no `'unsafe-inline'`).** Production serves
-  `script-src 'self' 'nonce-<per-request>' 'strict-dynamic'`; every inline
-  script Next.js emits and our JSON-LD blocks carry the per-request nonce
-  generated in `src/middleware.ts`.
+- **CSP `script-src` allows the app's own inline scripts (`'self'
+  'unsafe-inline'`), not a per-request nonce.** This is a deliberate trade-off.
+  A per-request nonce (`'nonce-<...>' 'strict-dynamic'`) is stricter, but reading
+  that nonce in a server component forces Next.js to render **every** page
+  dynamically (`Cache-Control: no-store`). That disabled the browser
+  back/forward cache and CDN caching, which caused intermittent **blank pages on
+  mobile Safari** on real devices. Dropping the nonce lets pages be prerendered
+  and cached, fixing the reliability problem. Residual XSS risk is low for this
+  site: it renders **no untrusted user input** (the news feed is fetched
+  server-side from trusted RSS sources and sanitized before render), `object-src`
+  is `'none'`, and `base-uri` / `form-action` are locked to `'self'`. JSON-LD
+  blocks are `type="application/ld+json"` (inert data, not executable script). If
+  the site ever begins accepting user-generated content, revisit this and move
+  back to a nonce-based policy (accepting the caching cost) or a hash-based one.
 - **CSP `style-src` deliberately retains `'unsafe-inline'`.** This is an
   accepted, intentional decision — not an oversight — and a nonce/hash cannot
   replace it. Under CSP Level 3, `'unsafe-inline'` is ignored as soon as a nonce
@@ -149,12 +159,9 @@ channel.
   `color:transparent`, `object-fit`, a computed `transition-duration`) whose
   values vary at runtime and cannot be exhaustively hashed. Adding a nonce/hash
   would break image and carousel rendering for zero security gain. Residual risk
-  is low: the JS-execution vector is fully locked down (`script-src` nonce +
-  `strict-dynamic`, `object-src 'none'`), inline styles cannot execute script,
-  and the site renders no untrusted user input (the news feed is fetched
-  server-side from trusted RSS sources and sanitized before render). Inline
-  `style` attributes in our own code are minimal (`src/components/ui/AppImage.tsx`,
-  `src/app/industries/page.tsx`).
+  is low: `object-src` is `'none'`, inline styles cannot execute script, and the
+  site renders no untrusted user input. Inline `style` attributes in our own code
+  are minimal (`src/components/ui/AppImage.tsx`, `src/app/industries/page.tsx`).
 - **Remaining `npm audit` moderate advisories** are transitive within
   `next` / `postcss` / `yaml` and only resolvable via semver-major upgrades,
   which require separate QA and are tracked outside this hardening pass.

@@ -90,8 +90,10 @@ All HTTP security headers and the strict production Content-Security-Policy live
 in `src/middleware.ts` (Next.js middleware, which runs natively on Vercel). This
 is the **single source of truth** for headers — `next.config.mjs` only sets
 dev-only no-cache headers. See `SECURITY.md` for the full policy and the
-documented CSP decisions (nonce-based `script-src`; `style-src` keeps
-`'unsafe-inline'` by design).
+documented CSP decisions. Note: `script-src` uses `'self' 'unsafe-inline'`
+(**not** a per-request nonce) on purpose — a per-request nonce forced every page
+to render dynamically (`no-store`), which broke mobile-Safari caching and caused
+intermittent blank pages. `style-src` keeps `'unsafe-inline'` by design.
 
 ## Media
 
