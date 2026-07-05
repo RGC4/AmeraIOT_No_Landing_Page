@@ -21,10 +21,9 @@
  *   - a legacy URL stops redirecting, redirects with a non-permanent status, or
  *     redirects to the wrong destination.
  *
- * Note on /downloads: it is one of the entries in `redirects()` (it redirects to
- * the Products page), so it is covered automatically like any other. next.config
- * redirects run before middleware, so the 410 in src/middleware.ts is never
- * reached for /downloads and is intentionally not asserted here.
+ * Note on /downloads: the retired Downloads section is one of the entries in
+ * `redirects()` (it redirects to the Products page), so it is covered
+ * automatically like any other legacy URL.
  *
  * It manages its own server the same way scripts/check-structured-data.mjs does:
  * by default it reuses a server already serving at BASE_URL
