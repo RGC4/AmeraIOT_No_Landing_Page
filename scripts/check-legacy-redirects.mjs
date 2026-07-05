@@ -3,22 +3,21 @@
  * Legacy-URL redirect guard.
  *
  * After the site was restructured, several old URLs that Google still links to
- * were kept alive with redirects (next.config.mjs `redirects()`), and the retired
- * Downloads section was made to return a hard 410 "Gone" (src/middleware.ts).
- * These are easy to break silently: a restructure, a typo in the redirect list,
- * or an edit to the middleware could quietly turn any of them back into a 404 —
- * re-breaking the exact links visitors click from Google, with nothing failing
- * visibly.
+ * were kept alive with permanent redirects (next.config.mjs `redirects()`),
+ * including the retired Downloads section (which now redirects to the Products
+ * page instead of erroring). These are easy to break silently: a restructure, a
+ * typo in the redirect list, or a config edit could quietly turn any of them back
+ * into a 404 — re-breaking the exact links visitors click from Google, with
+ * nothing failing visibly.
  *
  * This guard requests each of those old URLs and asserts the expected result:
- *   - moved pages must return a *permanent* redirect (301/308) whose Location
- *     points at the correct new page;
- *   - /downloads (and anything beneath it) must return 410 Gone.
+ *   - each moved page must return a *permanent* redirect (301/308) whose Location
+ *     points at the correct new page (this includes /downloads and anything
+ *     beneath it, which redirect to the Products page).
  *
  * This check fails (exit 1) when:
  *   - a legacy URL stops redirecting, redirects with a non-permanent status, or
- *     redirects to the wrong destination;
- *   - /downloads (or a path beneath it) stops returning 410.
+ *     redirects to the wrong destination.
  *
  * It manages its own server the same way scripts/check-structured-data.mjs does:
  * by default it reuses a server already serving at BASE_URL
@@ -39,12 +38,10 @@ const BASE_URL = (process.env.BASE_URL || `http://localhost:${DEFAULT_PORT}`).re
 
 /**
  * Every old URL Google still links to, and what it must do now. Keep this list
- * in lockstep with the `legacyRedirects` array in next.config.mjs and the
- * /downloads 410 in src/middleware.ts — if a redirect is added or changed there,
- * add/update it here so the guard keeps covering it.
+ * in lockstep with the `legacyRedirects` array in next.config.mjs — if a redirect
+ * is added or changed there, add/update it here so the guard keeps covering it.
  *
  *   - redirect : must return a permanent redirect (301/308) to `destination`.
- *   - gone     : must return 410 Gone.
  */
 const EXPECTED = [
   { source: '/products', kind: 'redirect', destination: '/products/amerakey' },
@@ -53,9 +50,10 @@ const EXPECTED = [
   { source: '/patents', kind: 'redirect', destination: '/company/patents' },
   { source: '/patent-portfolio', kind: 'redirect', destination: '/company/patents' },
   { source: '/our-patent-portfolio', kind: 'redirect', destination: '/company/patents' },
-  { source: '/downloads', kind: 'gone' },
-  // A path beneath /downloads must also be Gone (middleware matches the subtree).
-  { source: '/downloads/whitepaper', kind: 'gone' },
+  // The retired Downloads section redirects to Products instead of erroring;
+  // a path beneath it must redirect too (next.config.mjs matches the subtree).
+  { source: '/downloads', kind: 'redirect', destination: '/products/amerakey' },
+  { source: '/downloads/whitepaper', kind: 'redirect', destination: '/products/amerakey' },
 ];
 
 const PERMANENT_REDIRECT_STATUSES = new Set([301, 308]);
@@ -162,18 +160,6 @@ async function main() {
         continue;
       }
 
-      if (entry.kind === 'gone') {
-        if (res.status !== 410) {
-          fail(
-            `${entry.source}: expected HTTP 410 Gone, got ${res.status}. ` +
-              `The /downloads 410 in src/middleware.ts may have been removed or changed.`,
-          );
-          continue;
-        }
-        console.log(`  [ok] ${entry.source} -> 410 Gone`);
-        continue;
-      }
-
       // kind === 'redirect'
       if (!PERMANENT_REDIRECT_STATUSES.has(res.status)) {
         fail(
@@ -205,7 +191,7 @@ async function main() {
     for (const f of failures) console.error(`  - ${f}`);
     console.error(
       `\nThese old URLs are linked from Google. Restore the redirect in next.config.mjs ` +
-        `(or the /downloads 410 in src/middleware.ts) so visitors don't hit 404s.`,
+        `redirects() so visitors don't hit 404s.`,
     );
     process.exit(1);
   }

@@ -43,6 +43,11 @@ const nextConfig = {
       { source: '/patents', destination: '/company/patents', permanent: true },
       { source: '/patent-portfolio', destination: '/company/patents', permanent: true },
       { source: '/our-patent-portfolio', destination: '/company/patents', permanent: true },
+      // The Downloads section was retired. Rather than a 410 (which shows a
+      // "Gone" error page to anyone tapping the stale Google sitelink), send
+      // visitors to the Products page. Covers /downloads and anything beneath it.
+      { source: '/downloads', destination: '/products/amerakey', permanent: true },
+      { source: '/downloads/:path*', destination: '/products/amerakey', permanent: true },
     ];
 
     if (process.env.NODE_ENV !== 'production') {

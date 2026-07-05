@@ -85,19 +85,9 @@ function buildCsp(): string {
 }
 
 export function middleware(request: NextRequest) {
-  // The Downloads section was retired. Return 410 Gone (not a soft 404) for
-  // /downloads and anything beneath it so search engines drop the stale link
-  // that Google still lists as a sitelink.
-  const { pathname } = request.nextUrl;
-  if (pathname === '/downloads' || pathname.startsWith('/downloads/')) {
-    return new NextResponse('Gone. This page is no longer available.', {
-      status: 410,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'X-Content-Type-Options': 'nosniff',
-      },
-    });
-  }
+  // Note: the retired /downloads section is handled by a permanent redirect to
+  // the Products page in next.config.mjs redirects() (not a 410 here), so anyone
+  // tapping the stale Google sitelink lands on a real page instead of an error.
 
   // The CSP is identical for every request (no per-request nonce), so pages
   // stay statically prerenderable and CDN-cacheable. A per-request nonce used
