@@ -102,6 +102,47 @@ Stream** (the `iframe.mediadelivery.net` player) — not YouTube. Large raw medi
 is kept out of the repo (`attached_assets/` is gitignored) and hosted on the
 CDN.
 
+### Branded CDN hostname — `cdn.ameraiot.com`
+
+By default, `/assets/*` requests redirect to the shared Bunny hostname
+`ameraiot.b-cdn.net`. Some VPN/ad blockers (e.g. **Proton VPN's NetShield**)
+block the shared `b-cdn.net` domain, which silences every image and video while
+the page itself (served from `ameraiot.com`) still loads — the "blank page with
+only the menu" symptom. A **branded** CDN hostname avoids that blocklist.
+
+The CDN base is controlled by one environment variable, `ASSET_CDN_BASE`
+(default `https://ameraiot.b-cdn.net`), read in both `next.config.mjs` (the
+`/assets/*` redirect) and `scripts/publish.mjs` (cache purge). The CSP in
+`src/middleware.ts` already allows `cdn.ameraiot.com`, so switching is just DNS +
+Bunny + one env var — **no code change needed**.
+
+To switch to `cdn.ameraiot.com` (owner steps, in this order):
+
+1. **Bunny dashboard** → the pull zone that serves `ameraiot.b-cdn.net` →
+   **Hostnames** → **Add Custom Hostname** → `cdn.ameraiot.com`, then enable the
+   free **Bunny TLS** (Let's Encrypt) certificate for it.
+2. **Route 53** (where `ameraiot.com` DNS is hosted) → add a record:
+   - **Type:** `CNAME`
+   - **Name:** `cdn` (i.e. `cdn.ameraiot.com`)
+   - **Value:** `ameraiot.b-cdn.net`
+   - **TTL:** 300
+3. Verify it works: `https://cdn.ameraiot.com/assets/og-default-v2.jpg` should
+   load an image over HTTPS.
+4. Only **after** step 3 succeeds: in **Vercel → Project → Settings →
+   Environment Variables** set `ASSET_CDN_BASE = https://cdn.ameraiot.com`
+   (Production) and redeploy. From then on all `/assets/*` media serves from the
+   branded host. (Set the same variable in this workspace before running
+   `npm run publish` so its cache-purge targets the branded host too.)
+
+Do **not** point `ASSET_CDN_BASE` at `cdn.ameraiot.com` before steps 1–3 are
+live, or every image/video will 404.
+
+The **social share preview** (the card shown when the site is texted/linked) is
+the AMERA shield+logo splash at `public/assets/og-default-v2.jpg` (1200×630),
+set as `DEFAULT_OG_IMAGE` in `src/lib/seo.ts`. Reused OG filenames are cached for
+weeks by both the CDN and link scrapers, so replace it with a **new** filename
+(e.g. `-v3`) rather than overwriting.
+
 ## User preferences
 
 - Keep a **single typeface (Inter)** everywhere — body, headings, hero tagline.

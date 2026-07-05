@@ -14,14 +14,16 @@ const IMG_HOSTS = [
   'https://images.pexels.com',
   'https://images.pixabay.com',
   'https://img.rocket.new',
-  'https://*.b-cdn.net', // Bunny Stream video thumbnails / CDN
+  'https://*.b-cdn.net', // Bunny CDN (default pull-zone hostname)
+  'https://cdn.ameraiot.com', // branded Bunny CDN hostname (alias of the pull zone)
 ].join(' ');
 
 // Bunny Stream: iframe player origin + media/HLS CDN (b-cdn.net pull zones).
 // All video is served via the Bunny Stream player (src/components/VideoModal.tsx);
 // the legacy YouTube origin has been removed now that nothing embeds it.
 const VIDEO_FRAME_HOSTS = 'https://iframe.mediadelivery.net';
-const VIDEO_MEDIA_HOSTS = 'https://*.b-cdn.net https://iframe.mediadelivery.net';
+const VIDEO_MEDIA_HOSTS =
+  'https://*.b-cdn.net https://cdn.ameraiot.com https://iframe.mediadelivery.net';
 
 // Display-only marketing site. In production script-src allows the app's own
 // scripts: 'self' for external chunk files plus 'unsafe-inline' for the inline

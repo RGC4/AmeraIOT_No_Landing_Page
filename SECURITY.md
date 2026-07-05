@@ -47,7 +47,10 @@ injected via `src/middleware.ts`:
   per-directive allowlist (`object-src 'none'`, `base-uri 'self'`,
   `form-action 'self'`, `frame-ancestors 'self'`, `upgrade-insecure-requests`).
   Embedded video is allowlisted to the Bunny Stream player
-  (`iframe.mediadelivery.net`, `*.b-cdn.net`).
+  (`iframe.mediadelivery.net`, `*.b-cdn.net`, `cdn.ameraiot.com`). Site media
+  (images/video under `/assets/*`) is served from the Bunny CDN via either the
+  default `*.b-cdn.net` hostname or the branded `cdn.ameraiot.com` alias, so both
+  are allowlisted in `img-src`/`media-src`/`connect-src`.
 - `Strict-Transport-Security` — `max-age=63072000; includeSubDomains; preload`.
 - `X-Frame-Options: SAMEORIGIN`
 - `X-Content-Type-Options: nosniff`
