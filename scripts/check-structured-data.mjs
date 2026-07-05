@@ -4,11 +4,10 @@
  *
  * Google shows rich results (organization info, breadcrumbs, products, news)
  * only when each page emits its JSON-LD `<script type="application/ld+json">`
- * block. Since the CSP hardening, that structured data is produced from a
- * central server registry (src/lib/structured-data.ts) and rendered with the
- * per-request CSP nonce. A typo in a pathname key, a missing registry entry for
- * a new route, or a dropped nonce would silently remove a page's structured
- * data without breaking the page visually.
+ * block. That structured data is produced from a central registry
+ * (src/lib/structured-data.ts). A typo in a pathname key or a missing registry
+ * entry for a new route would silently remove a page's structured data without
+ * breaking the page visually.
  *
  * Beyond presence, a schema can *parse* yet still be malformed for Google: the
  * wrong @type, a missing required property (a Product without a name), or a
@@ -18,8 +17,7 @@
  *
  * This check fails (exit 1) when:
  *   - a known route stops emitting its expected JSON-LD block(s);
- *   - any emitted JSON-LD block is missing the `nonce` attribute (it would be
- *     blocked by the strict production CSP), or its JSON does not parse;
+ *   - any emitted JSON-LD block's JSON does not parse;
  *   - the site-wide Organization/WebSite graph is missing or loses a required
  *     property on any route;
  *   - a route's own schema has the wrong @type or is missing a required
@@ -30,9 +28,9 @@
  * It manages its own server. By default (dev mode) it reuses a server already
  * serving at BASE_URL (default http://localhost:5000) or starts `next dev`.
  * With `--prod` (or STRUCTURED_DATA_PROD=1) it instead runs a real `next build`
- * and `next start` (default port 3000) so the checks run under the strict,
- * nonce-based PRODUCTION CSP — catching nonce regressions that only appear in a
- * prod build. Either way it shuts the server down when finished.
+ * and `next start` (default port 3000) so the checks run under the PRODUCTION
+ * CSP — catching regressions that only appear in a prod build. Either way it
+ * shuts the server down when finished.
  */
 
 import { readFileSync, readdirSync } from 'node:fs';
@@ -46,11 +44,12 @@ const APP_DIR = join(ROOT, 'src', 'app');
 
 /**
  * Production mode (`--prod` or STRUCTURED_DATA_PROD=1): build the app and serve
- * it with `next start` so the checks run under the *strict, nonce-based*
- * production CSP (src/middleware.ts buildCsp, NODE_ENV==='production') instead of
- * the relaxed dev policy. This catches regressions that only manifest in a prod
- * build — e.g. a script or JSON-LD block emitted without the per-request nonce,
- * which the strict CSP would block. Dev mode keeps using `next dev`.
+ * it with `next start` so the checks run under the production CSP
+ * (src/middleware.ts buildCsp, NODE_ENV==='production') instead of the relaxed
+ * dev policy. This catches regressions that only manifest in a prod build. The
+ * production CSP is a static `script-src 'self' 'unsafe-inline'` (no per-request
+ * nonce, no 'unsafe-eval') plus 'upgrade-insecure-requests'. Dev mode keeps
+ * using `next dev`.
  */
 const PROD = process.argv.includes('--prod') || process.env.STRUCTURED_DATA_PROD === '1';
 const DEFAULT_PORT = PROD ? '3000' : '5000';
@@ -320,7 +319,6 @@ function extractJsonLd(html) {
       valid = false;
     }
     blocks.push({
-      hasNonce: /\bnonce\s*=\s*"[^"]+"/i.test(attrs),
       body,
       json,
       valid,
@@ -357,10 +355,9 @@ async function fetchHtml(url) {
 
 /**
  * In production mode, prove the server we're about to check is actually serving
- * the strict production CSP — not a dev server (or some other service) that
- * happens to be reachable at BASE_URL. Without this, prod-mode reuse could pass
- * against a relaxed policy and give a false sense of safety. Fails fast on any
- * mismatch.
+ * the production CSP — not a dev server (or some other service) that happens to
+ * be reachable at BASE_URL. Without this, prod-mode reuse could pass against a
+ * relaxed policy and give a false sense of safety. Fails fast on any mismatch.
  */
 async function assertProdCsp(baseUrl) {
   const before = failures.length;
@@ -382,17 +379,22 @@ async function assertProdCsp(baseUrl) {
     return;
   }
   const scriptSrc = (csp.match(/script-src[^;]*/i) || [''])[0];
-  if (!/'nonce-[^']+'/.test(scriptSrc)) {
-    fail(`--prod: script-src has no nonce — not the strict production CSP. Got: ${scriptSrc || '(missing script-src)'}`);
+  // Production uses a static script-src 'self' 'unsafe-inline' (no per-request
+  // nonce — see src/middleware.ts). It must NOT contain 'unsafe-eval' (dev-only,
+  // for HMR), and the response must carry the production-only
+  // 'upgrade-insecure-requests' directive. Together these distinguish the prod
+  // CSP from the relaxed dev policy.
+  if (!scriptSrc) {
+    fail(`--prod: no script-src directive — not a valid CSP. Got: ${csp}`);
   }
-  if (!/'strict-dynamic'/.test(scriptSrc)) {
-    fail(`--prod: script-src is missing 'strict-dynamic' — not the strict production CSP. Got: ${scriptSrc}`);
+  if (/'unsafe-eval'/.test(scriptSrc)) {
+    fail(`--prod: script-src allows 'unsafe-eval' — this is the dev/relaxed CSP, not production. Got: ${scriptSrc}`);
   }
-  if (/'unsafe-inline'|'unsafe-eval'/.test(scriptSrc)) {
-    fail(`--prod: script-src allows unsafe-inline/unsafe-eval — this is a dev/relaxed CSP, not production. Got: ${scriptSrc}`);
+  if (!/upgrade-insecure-requests/.test(csp)) {
+    fail(`--prod: CSP is missing 'upgrade-insecure-requests' — not the production policy. Got: ${csp}`);
   }
   if (failures.length === before) {
-    console.log(`--prod: confirmed strict production CSP (nonce + strict-dynamic, no unsafe-*).`);
+    console.log(`--prod: confirmed production CSP (script-src 'self' 'unsafe-inline', no unsafe-eval, upgrade-insecure-requests).`);
   }
 }
 
@@ -501,8 +503,8 @@ async function main() {
       await assertProdCsp(BASE_URL);
     }
 
-    // 3) HTTP check: each route still emits its JSON-LD block(s), each nonced,
-    //    valid JSON, and well-formed for Google (correct @type + required props).
+    // 3) HTTP check: each route still emits its JSON-LD block(s), valid JSON,
+    //    and well-formed for Google (correct @type + required props).
     for (const [pattern, cfg] of Object.entries(EXPECTED)) {
       const path = cfg.dynamic ? pattern.replace('[slug]', slug) : pattern;
       const url = BASE_URL + path;
@@ -544,9 +546,6 @@ async function main() {
       }
 
       blocks.forEach((b, i) => {
-        if (!b.hasNonce) {
-          fail(`${path}: JSON-LD block #${i + 1} has no nonce attribute (blocked by prod CSP).`);
-        }
         if (!b.valid) {
           fail(`${path}: JSON-LD block #${i + 1} is not valid JSON.`);
         }
@@ -564,7 +563,7 @@ async function main() {
 
       const ok =
         blocks.length >= required &&
-        blocks.every((b) => b.hasNonce && b.valid) &&
+        blocks.every((b) => b.valid) &&
         routeErrors.length === 0;
       console.log(
         `  [${ok ? 'ok' : 'FAIL'}] ${path}  (${blocks.length} block(s), ${required} required` +
@@ -584,7 +583,7 @@ async function main() {
     for (const f of failures) console.error(`  - ${f}`);
     process.exit(1);
   }
-  console.log('\nStructured-data check passed: every route emits nonced, well-formed JSON-LD.');
+  console.log('\nStructured-data check passed: every route emits well-formed JSON-LD.');
 }
 
 // Crawl the live site only when invoked directly. Importing this module (e.g.
