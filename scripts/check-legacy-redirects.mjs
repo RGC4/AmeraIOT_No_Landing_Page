@@ -3,27 +3,34 @@
  * Legacy-URL redirect guard.
  *
  * After the site was restructured, several old URLs that Google still links to
- * were kept alive with permanent redirects (next.config.mjs `redirects()`),
- * including the retired Downloads section (which now redirects to the Products
- * page instead of erroring). These are easy to break silently: a restructure, a
- * typo in the redirect list, or a config edit could quietly turn any of them back
- * into a 404 — re-breaking the exact links visitors click from Google, with
- * nothing failing visibly.
+ * were kept alive with permanent redirects (next.config.mjs `redirects()`).
+ * These are easy to break silently: a restructure, a typo in the redirect list,
+ * or a removed entry could quietly turn any of them back into a 404 —
+ * re-breaking the exact links visitors click from Google, with nothing failing
+ * visibly.
  *
- * This guard requests each of those old URLs and asserts the expected result:
- *   - each moved page must return a *permanent* redirect (301/308) whose Location
- *     points at the correct new page (this includes /downloads and anything
- *     beneath it, which redirect to the Products page).
+ * To guarantee the guard can never fall behind, it does NOT keep its own copy of
+ * the redirect list. It imports next.config.mjs, calls `redirects()`, and derives
+ * the checks from that output. Adding a redirect to next.config.mjs therefore
+ * makes this guard verify it automatically — there is no second list to update.
+ *
+ * This guard requests each derived old URL and asserts it returns a *permanent*
+ * redirect (301/308) whose Location points at the correct new page.
  *
  * This check fails (exit 1) when:
  *   - a legacy URL stops redirecting, redirects with a non-permanent status, or
  *     redirects to the wrong destination.
  *
+ * Note on /downloads: it is one of the entries in `redirects()` (it redirects to
+ * the Products page), so it is covered automatically like any other. next.config
+ * redirects run before middleware, so the 410 in src/middleware.ts is never
+ * reached for /downloads and is intentionally not asserted here.
+ *
  * It manages its own server the same way scripts/check-structured-data.mjs does:
  * by default it reuses a server already serving at BASE_URL
- * (default http://localhost:5000) or starts `next dev`. Redirects and the 410
- * apply in ALL environments (they are not production-gated), so dev mode is
- * sufficient to verify them. The server is shut down when finished.
+ * (default http://localhost:5000) or starts `next dev`. Redirects apply in ALL
+ * environments (they are not production-gated), so dev mode is sufficient to
+ * verify them. The server is shut down when finished.
  */
 
 import { dirname } from 'node:path';
@@ -37,24 +44,53 @@ const DEFAULT_PORT = '5000';
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${DEFAULT_PORT}`).replace(/\/$/, '');
 
 /**
- * Every old URL Google still links to, and what it must do now. Keep this list
- * in lockstep with the `legacyRedirects` array in next.config.mjs — if a redirect
- * is added or changed there, add/update it here so the guard keeps covering it.
- *
- *   - redirect : must return a permanent redirect (301/308) to `destination`.
+ * Build a sample value for a Next.js path parameter so a pattern like
+ * "/downloads/:path*" can be requested as a concrete URL. The same value is
+ * substituted into the destination too, so a redirect that forwards a param
+ * (e.g. "/old/:slug" -> "/new/:slug") is compared correctly.
  */
-const EXPECTED = [
-  { source: '/products', kind: 'redirect', destination: '/products/amerakey' },
-  { source: '/vision-and-mission', kind: 'redirect', destination: '/company/vision-and-mission' },
-  { source: '/industry-use-cases', kind: 'redirect', destination: '/industries' },
-  { source: '/patents', kind: 'redirect', destination: '/company/patents' },
-  { source: '/patent-portfolio', kind: 'redirect', destination: '/company/patents' },
-  { source: '/our-patent-portfolio', kind: 'redirect', destination: '/company/patents' },
-  // The retired Downloads section redirects to Products instead of erroring;
-  // a path beneath it must redirect too (next.config.mjs matches the subtree).
-  { source: '/downloads', kind: 'redirect', destination: '/products/amerakey' },
-  { source: '/downloads/whitepaper', kind: 'redirect', destination: '/products/amerakey' },
-];
+function sampleFor(name) {
+  return `sample-${name}`;
+}
+
+/**
+ * Turn one next.config redirect ({ source, destination, permanent }) into a
+ * concrete check by substituting any Next.js path params (`:name`, `:name*`,
+ * `:name+`, `:name?`) in both source and destination with the same sample value.
+ */
+function toCheck(redirect) {
+  const params = new Map();
+  const substitute = (pattern) =>
+    pattern.replace(/:(\w+)([*+?]?)/g, (_, name) => {
+      if (!params.has(name)) params.set(name, sampleFor(name));
+      return params.get(name);
+    });
+  return {
+    original: redirect.source,
+    source: substitute(redirect.source),
+    destination: substitute(redirect.destination),
+  };
+}
+
+/**
+ * Load the moved-page redirects straight from next.config.mjs. `redirects()`
+ * returns both the same-origin legacy redirects AND (in production) the
+ * /assets/* -> Bunny CDN redirect. We only want the same-origin moved pages, so
+ * keep entries whose destination is a relative path ("/..."); that naturally
+ * excludes the absolute CDN URL. This is the single source of truth — there is
+ * no duplicated list to maintain here.
+ */
+async function loadExpected() {
+  const configUrl = new URL('../next.config.mjs', import.meta.url);
+  const nextConfig = (await import(configUrl)).default;
+  if (typeof nextConfig?.redirects !== 'function') {
+    throw new Error('next.config.mjs does not export a redirects() function.');
+  }
+  const all = await nextConfig.redirects();
+  return all
+    .filter((r) => typeof r.destination === 'string' && r.destination.startsWith('/'))
+    .map(toCheck);
+}
 
 const PERMANENT_REDIRECT_STATUSES = new Set([301, 308]);
 
@@ -142,6 +178,15 @@ async function startServer() {
 /* ---------------------------------- main ---------------------------------- */
 
 async function main() {
+  const expected = await loadExpected();
+  if (expected.length === 0) {
+    console.error(
+      'Legacy-redirect guard FAILED: next.config.mjs redirects() returned no ' +
+        'same-origin moved-page redirects to verify. Expected at least one.',
+    );
+    process.exit(1);
+  }
+
   let spawned = null;
   if (!(await reachable(BASE_URL))) {
     spawned = await startServer();
@@ -150,20 +195,19 @@ async function main() {
   }
 
   try {
-    for (const entry of EXPECTED) {
+    for (const entry of expected) {
       const url = BASE_URL + entry.source;
       let res;
       try {
         res = await fetchStatus(url);
       } catch (err) {
-        fail(`${entry.source}: request failed (${err.message}).`);
+        fail(`${entry.original}: request failed (${err.message}).`);
         continue;
       }
 
-      // kind === 'redirect'
       if (!PERMANENT_REDIRECT_STATUSES.has(res.status)) {
         fail(
-          `${entry.source}: expected a permanent redirect (301/308), got ${res.status}. ` +
+          `${entry.original}: expected a permanent redirect (301/308), got ${res.status}. ` +
             `The redirect may have been removed from next.config.mjs redirects().`,
         );
         continue;
@@ -172,13 +216,13 @@ async function main() {
       const want = entry.destination.replace(/\/$/, '') || '/';
       if (got !== want) {
         fail(
-          `${entry.source}: redirects to "${res.location ?? '(no Location)'}" ` +
+          `${entry.original}: redirects to "${res.location ?? '(no Location)'}" ` +
             `(path "${got ?? 'none'}"), expected "${want}". ` +
             `Check the destination in next.config.mjs redirects().`,
         );
         continue;
       }
-      console.log(`  [ok] ${entry.source} -> ${res.status} ${want}`);
+      console.log(`  [ok] ${entry.original} -> ${res.status} ${want}`);
     }
   } finally {
     if (spawned) {
@@ -191,12 +235,12 @@ async function main() {
     for (const f of failures) console.error(`  - ${f}`);
     console.error(
       `\nThese old URLs are linked from Google. Restore the redirect in next.config.mjs ` +
-        `redirects() so visitors don't hit 404s.`,
+        `so visitors don't hit 404s.`,
     );
     process.exit(1);
   }
 
-  console.log(`\nLegacy-redirect guard passed: all ${EXPECTED.length} legacy URL(s) behave correctly.`);
+  console.log(`\nLegacy-redirect guard passed: all ${expected.length} legacy URL(s) behave correctly.`);
 }
 
 main().catch((err) => {
