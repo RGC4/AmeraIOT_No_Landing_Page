@@ -189,7 +189,7 @@ export default function IndustriesPage() {
         )}
         {/* Centered hero heading over the video */}
         <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
-          <h2 className="whitespace-nowrap text-center font-bold text-white leading-tight capitalize text-xl sm:text-2xl md:text-4xl lg:text-5xl [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]">
+          <h2 className="text-balance text-center font-bold text-white leading-tight capitalize text-2xl sm:text-3xl md:text-4xl lg:text-5xl [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]">
             Leveraging The Zero Transit Paradigm
           </h2>
         </div>
