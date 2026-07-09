@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '@/components/Header';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -57,10 +57,82 @@ const metrics = [
 export default function HomePage() {
   const [heroReady, setHeroReady] = useState(false);
   const [heroMobile, setHeroMobile] = useState(false);
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   useEffect(() => {
     setHeroMobile(window.matchMedia('(max-width: 1023px)').matches);
     setHeroReady(true);
   }, []);
+
+  // Force autoplay in strict in-app WebViews (TikTok, Instagram, Facebook,
+  // in-app Safari/Chrome) that ignore the autoPlay attribute but allow a
+  // scripted muted play. Retries on visibility/scroll/first interaction.
+  useEffect(() => {
+    if (!heroReady) return;
+    const video = heroVideoRef.current;
+    if (!video) return;
+
+    // Set the properties strict WebViews check for, not just attributes.
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+
+    let cancelled = false;
+
+    const tryPlay = () => {
+      if (cancelled) return;
+      const p = video.play();
+      if (p && typeof p.then === 'function') {
+        // Swallow rejection: autoplay blocked, a later retry may succeed.
+        p.catch(() => {});
+      }
+    };
+
+    tryPlay();
+
+    const onCanPlay = () => tryPlay();
+    const onLoadedData = () => tryPlay();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') tryPlay();
+    };
+
+    video.addEventListener('canplay', onCanPlay);
+    video.addEventListener('loadeddata', onLoadedData);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) tryPlay();
+          }
+        },
+        { threshold: 0.25 }
+      );
+      observer.observe(video);
+    }
+
+    // Last resort: the first user gesture anywhere unblocks playback.
+    const onInteract = () => tryPlay();
+    document.addEventListener('touchstart', onInteract, {
+      once: true,
+      passive: true,
+    });
+    document.addEventListener('click', onInteract, { once: true });
+
+    return () => {
+      cancelled = true;
+      video.removeEventListener('canplay', onCanPlay);
+      video.removeEventListener('loadeddata', onLoadedData);
+      document.removeEventListener('visibilitychange', onVisibility);
+      document.removeEventListener('touchstart', onInteract);
+      document.removeEventListener('click', onInteract);
+      observer?.disconnect();
+    };
+  }, [heroReady, heroMobile]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -70,6 +142,7 @@ export default function HomePage() {
       <section className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#020B1F]">
         {heroReady ? (
           <video
+            ref={heroVideoRef}
             src={
               heroMobile
                 ? '/assets/hero-tidal-wave-mobile-v19.mp4'
@@ -80,7 +153,7 @@ export default function HomePage() {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             className="block w-full h-auto aspect-video object-contain lg:aspect-auto lg:h-[78vh] lg:object-cover lg:object-[50%_40%]"
           />
         ) : (
