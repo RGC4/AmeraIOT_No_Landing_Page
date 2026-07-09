@@ -17,6 +17,7 @@
     "check:structured-data:prod": "node scripts/check-structured-data.mjs --prod",
     "check:structured-data:validators": "node scripts/check-structured-data-validators.mjs",
     "check:legacy-redirects": "node scripts/check-legacy-redirects.mjs",
+    "check:hero-autoplay": "node scripts/check-hero-autoplay.mjs",
     "check:live-headers": "node scripts/check-live-headers.mjs",
     "audit:security": "npm audit --audit-level=high",
     "publish": "node scripts/publish.mjs"
