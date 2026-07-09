@@ -7,6 +7,22 @@ export const DEFAULT_OG_IMAGE = '/assets/og-default-v3.jpg';
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
 
+// Where /assets/* media actually lives (Bunny CDN). Mirrors the ASSET_CDN_BASE
+// used by next.config.mjs and scripts/publish.mjs.
+const ASSET_CDN_BASE = process.env.ASSET_CDN_BASE || 'https://ameraiot.b-cdn.net';
+
+/**
+ * Resolve a social-preview image to its DIRECT CDN URL (a 200, no redirect).
+ * On the live site, /assets/* returns a 307 redirect to the Bunny CDN. Some
+ * link-preview crawlers — notably iMessage on iOS — do not follow that redirect,
+ * so the share card renders with no image (a blank card). Pointing og:image /
+ * twitter:image straight at the CDN removes the hop so every scraper gets the
+ * image. Absolute URLs are passed through unchanged.
+ */
+function resolveOgImageUrl(path: string): string {
+  return /^https?:\/\//.test(path) ? path : `${ASSET_CDN_BASE}${path}`;
+}
+
 interface PageMetaInput {
   /** Full <title> for the page (e.g. "Industries — Amera®"). */
   title: string;
@@ -43,7 +59,7 @@ export function pageMetadata({
   const usingDefault = image === undefined;
 
   const ogImage: { url: string; alt: string; width?: number; height?: number } = {
-    url: image ?? DEFAULT_OG_IMAGE,
+    url: resolveOgImageUrl(image ?? DEFAULT_OG_IMAGE),
     alt: imageAlt ?? title,
   };
   if (usingDefault) {
