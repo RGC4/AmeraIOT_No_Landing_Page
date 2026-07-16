@@ -1,13 +1,55 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Link from 'next/link';
 import Image from 'next/image';
 import Footer from '@/components/Footer';
 import { Reg } from '@/components/tm';
 
+type SendStatus = 'idle' | 'sending' | 'sent' | 'error';
+
 export default function ContactPage() {
+  const [status, setStatus] = useState<SendStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    setStatus('sending');
+    setErrorMessage('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: fd.get('name'),
+          email: fd.get('email'),
+          company: fd.get('company'),
+          phone: fd.get('phone'),
+          message: fd.get('message'),
+          website: fd.get('website'),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        setStatus('sent');
+        form.reset();
+      } else {
+        setStatus('error');
+        setErrorMessage(
+          typeof data.error === 'string'
+            ? data.error
+            : 'Something went wrong. Please email us directly.'
+        );
+      }
+    } catch {
+      setStatus('error');
+      setErrorMessage('Something went wrong. Please email us directly.');
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -43,7 +85,12 @@ export default function ContactPage() {
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Contact form */}
-          <form className="lg:col-span-2 card-on-gray p-6 sm:p-8 space-y-5">
+          <form onSubmit={handleSubmit} className="lg:col-span-2 card-on-gray p-6 sm:p-8 space-y-5">
+            {/* Honeypot — hidden from real visitors, catches naive bots */}
+            <div className="hidden" aria-hidden="true">
+              <label htmlFor="website">Website</label>
+              <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-1.5">
@@ -111,10 +158,26 @@ export default function ContactPage() {
             </div>
             <button
               type="submit"
-              className="inline-flex items-center gap-2 bg-[#114D8F] hover:bg-[#0d3d72] text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors shadow-sm"
+              disabled={status === 'sending'}
+              className="inline-flex items-center gap-2 bg-[#114D8F] hover:bg-[#0d3d72] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors shadow-sm"
             >
-              Send Message
+              {status === 'sending' ? 'Sending…' : 'Send Message'}
             </button>
+            <div aria-live="polite">
+              {status === 'sent' && (
+                <p className="text-sm font-semibold text-green-700">
+                  Thank you — your message has been sent. We&rsquo;ll get back to you soon.
+                </p>
+              )}
+              {status === 'error' && (
+                <p className="text-sm font-semibold text-red-700">
+                  {errorMessage}{' '}
+                  <a href="mailto:info@ameramail.com" className="underline">
+                    info@ameramail.com
+                  </a>
+                </p>
+              )}
+            </div>
           </form>
 
           {/* Contact details */}
