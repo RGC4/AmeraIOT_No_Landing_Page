@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getPool } from '@/lib/db';
 
-// Receives Contact Us form submissions and forwards them to the Google Sheet
-// via a Google Apps Script "web app" attached to the sheet (see
-// scripts/contact-sheet-apps-script.gs for the script and setup steps).
+// Receives Contact Us form submissions:
+//   1. Saves the message to the contact_submissions table (required — if this
+//      fails the visitor sees an error, nothing is silently dropped).
+//   2. Emails a copy to the site owner via Resend (best-effort — a mail
+//      failure is logged but does not fail the submission, because the
+//      message is already safely stored and visible at /admin/messages).
 //
-// Configuration (required in every environment that should accept messages):
-//   CONTACT_SHEET_WEBHOOK_URL — the Apps Script web-app URL (ends in /exec)
-//   CONTACT_FORM_TOKEN        — shared secret; the same value is pasted into
-//                               the Apps Script so it only accepts our posts.
-// If either is missing the endpoint fails loudly with a 503 (no silent drop).
+// Configuration:
+//   DATABASE_URL       — required (Postgres; same value in Replit and Vercel)
+//   RESEND_API_KEY     — optional; enables the email copy
+//   CONTACT_EMAIL_TO   — optional; defaults to info@ameramail.com
+//   CONTACT_EMAIL_FROM — optional; defaults to Resend's onboarding sender
 export const dynamic = 'force-dynamic';
 
 const MAX_BODY_BYTES = 32 * 1024;
-
-// Field length caps — generous for real messages, hostile to abuse.
 const LIMITS = { name: 200, email: 200, company: 200, phone: 50, message: 5000 } as const;
-
-// Basic shape check only — the definitive validation is a human reading the sheet.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Per-IP rate limit: at most 5 submissions per 10 minutes. In-memory and
@@ -47,17 +47,53 @@ function clean(value: unknown, max: number): string {
   return value.trim().slice(0, max);
 }
 
-export async function POST(request: NextRequest) {
-  const webhookUrl = process.env.CONTACT_SHEET_WEBHOOK_URL;
-  const token = process.env.CONTACT_FORM_TOKEN;
-  if (!webhookUrl || !token) {
-    console.error('[contact] CONTACT_SHEET_WEBHOOK_URL / CONTACT_FORM_TOKEN not configured');
-    return NextResponse.json(
-      { ok: false, error: 'The contact form is not configured yet. Please email us directly.' },
-      { status: 503 }
-    );
-  }
+function escapeHtml(s: string): string {
+  return s
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
 
+async function sendEmailCopy(sub: {
+  name: string;
+  email: string;
+  company: string;
+  phone: string;
+  message: string;
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('[contact] RESEND_API_KEY not set — submission saved, no email sent');
+    return;
+  }
+  const to = process.env.CONTACT_EMAIL_TO || 'info@ameramail.com';
+  const from = process.env.CONTACT_EMAIL_FROM || 'Amera Website <onboarding@resend.dev>';
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      reply_to: sub.email,
+      subject: `New contact form message from ${sub.name}`,
+      html: `<h2>New message from the Amera website contact form</h2>
+<p><strong>Name:</strong> ${escapeHtml(sub.name)}<br/>
+<strong>Email:</strong> ${escapeHtml(sub.email)}<br/>
+<strong>Company:</strong> ${escapeHtml(sub.company) || '—'}<br/>
+<strong>Phone:</strong> ${escapeHtml(sub.phone) || '—'}</p>
+<p style="white-space:pre-wrap">${escapeHtml(sub.message)}</p>
+<p>All messages are also saved at ameraiot.com/admin/messages.</p>`,
+    }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('[contact] email copy failed:', res.status, text.slice(0, 300));
+  }
+}
+
+export async function POST(request: NextRequest) {
   if (isRateLimited(getClientIp(request))) {
     return NextResponse.json(
       { ok: false, error: 'Too many messages from this connection. Please try again later.' },
@@ -97,29 +133,23 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Apps Script web apps answer POSTs with a redirect to a one-time
-    // googleusercontent URL, so redirects must be followed.
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, name, email, company, phone, message }),
-      redirect: 'follow',
-      signal: AbortSignal.timeout(15_000),
-    });
-    const text = await res.text();
-    if (!res.ok || !text.includes('"ok":true')) {
-      console.error('[contact] sheet webhook rejected submission:', res.status, text.slice(0, 300));
-      return NextResponse.json(
-        { ok: false, error: 'Your message could not be saved. Please email us directly.' },
-        { status: 502 }
-      );
-    }
+    await getPool().query(
+      `INSERT INTO contact_submissions (name, email, company, phone, message)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [name, email, company, phone, message]
+    );
   } catch (err) {
-    console.error('[contact] sheet webhook unreachable:', err);
+    console.error('[contact] failed to save submission:', err);
     return NextResponse.json(
       { ok: false, error: 'Your message could not be saved. Please email us directly.' },
       { status: 502 }
     );
+  }
+
+  try {
+    await sendEmailCopy({ name, email, company, phone, message });
+  } catch (err) {
+    console.error('[contact] email copy failed:', err);
   }
 
   return NextResponse.json({ ok: true });

@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "python-3.11"]
+modules = ["nodejs-20", "python-3.11", "postgresql-16"]
 [nix]
 channel = "stable-25_05"
 
@@ -140,4 +140,3 @@ build = ["npm", "run", "build"]
 [userenv]
 
 [userenv.shared]
-CONTACT_FORM_TOKEN = "amera_6d06a4f4a2bbdafc52d3e497ec89e2226153928c9719c103"
