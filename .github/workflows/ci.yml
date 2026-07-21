@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the PR code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Use the same Node version as the rest of the project (.nvmrc) so the
       # build runs against exactly what we develop and audit on.

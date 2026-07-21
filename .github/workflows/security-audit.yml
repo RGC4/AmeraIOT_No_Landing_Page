@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the PR code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Use the same Node version as the rest of the project (.nvmrc).
       - name: Set up Node
