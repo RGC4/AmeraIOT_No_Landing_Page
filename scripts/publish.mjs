@@ -26,8 +26,8 @@ const PRUNE = args.includes('--prune');
 const FORCE = args.includes('--force');
 
 // ---- config --------------------------------------------------------------
-const GH_OWNER = 'RGC4';
-const GH_REPO = 'AmeraIOT_No_Landing_Page';
+const GH_OWNER = 'amera-iot';
+const GH_REPO = 'amera_iot_replit_website';
 const GH_BRANCH = 'main';
 
 const BUNNY_ZONE = 'amera-media';
