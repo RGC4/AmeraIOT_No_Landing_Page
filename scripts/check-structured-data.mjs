@@ -95,6 +95,9 @@ const EXPECTED = {
   '/company/patents': { kind: 'sitewide', minBlocks: 1 },
   '/company/vision-and-mission': { kind: 'sitewide', minBlocks: 1 },
   '/contact': { kind: 'sitewide', minBlocks: 1 },
+  // Private, noindex admin inbox — carries only the site-wide graph from the
+  // root layout; it is never meant to appear in search results.
+  '/admin/messages': { kind: 'sitewide', minBlocks: 1 },
   '/privacy-policy': { kind: 'sitewide', minBlocks: 1 },
   '/terms-of-service': { kind: 'sitewide', minBlocks: 1 },
   '/resources': { kind: 'registry', minBlocks: 2, schemaType: 'CollectionPage' },
