@@ -47,7 +47,7 @@ jobs:
       # Use the same Node version as the rest of the project (.nvmrc) so the
       # build runs against exactly what we develop and audit on.
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
